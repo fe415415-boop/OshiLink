@@ -28,13 +28,9 @@ export default async function DiagramPage({ params }: Props) {
 
   const isOwner = !!user && user.id === diagram.user_id
 
-  // 非公開かつ非所有者はメッセージ表示
+  // 非公開かつ非所有者はメッセージページにリダイレクト
   if (!isOwner && !diagram.is_public) {
-    return (
-      <div className="flex items-center justify-center h-full text-white/60 text-sm">
-        現在は非公開の相関図です。
-      </div>
-    )
+    redirect('/diagram/private')
   }
 
   const template = diagram.templates as { id: string; title: string; template_characters: TemplateCharacter[] }
