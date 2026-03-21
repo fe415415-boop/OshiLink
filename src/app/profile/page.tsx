@@ -64,7 +64,7 @@ export default async function ProfilePage() {
             </Link>
           </div>
         ) : (
-          <div className="flex overflow-x-auto gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4">
+          <div className="flex overflow-x-auto gap-3 pb-2">
             {diagrams.map((d) => {
               const tmpl = d.templates as { id: string; title: string; template_characters: TemplateCharacter[] } | null
               const characters: TemplateCharacter[] = tmpl?.template_characters ?? []
@@ -81,7 +81,7 @@ export default async function ProfilePage() {
               }))
 
               return (
-                <div key={d.id} className="shrink-0 w-44 sm:w-auto">
+                <div key={d.id} className="shrink-0 w-44">
                   <DiagramCard
                     id={d.id}
                     title={d.title}
@@ -110,9 +110,9 @@ export default async function ProfilePage() {
             </Link>
           </div>
         ) : (
-          <div className="flex overflow-x-auto gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4">
+          <div className="flex overflow-x-auto gap-3 pb-2">
             {(templates as unknown as TemplateWithCharacters[]).map((t) => (
-              <div key={t.id} className="shrink-0 w-44 sm:w-auto">
+              <div key={t.id} className="shrink-0 w-44">
                 <TemplateCard template={t} isFavorited={favoriteIds.has(t.id)} userId={user.id} />
               </div>
             ))}
@@ -127,9 +127,9 @@ export default async function ProfilePage() {
             <p className="text-sm">お気に入りのテンプレートはありません</p>
           </div>
         ) : (
-          <div className="flex overflow-x-auto gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4">
+          <div className="flex overflow-x-auto gap-3 pb-2">
             {(favoritedTemplates as unknown as TemplateWithCharacters[]).map((t) => (
-              <div key={t.id} className="shrink-0 w-44 sm:w-auto">
+              <div key={t.id} className="shrink-0 w-44">
                 <TemplateCard template={t} isFavorited={true} userId={user.id} />
               </div>
             ))}
