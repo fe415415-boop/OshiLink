@@ -43,6 +43,8 @@ export default function HScrollList({ className = '', children }: Props) {
   }, [updateIndicators])
 
   function handleMouseDown(e: React.MouseEvent) {
+    // button/input などインタラクティブ要素上ではドラッグを開始しない
+    if ((e.target as HTMLElement).closest('button, input, [role="button"]')) return
     if (!scrollRef.current) return
     const el = scrollRef.current
 
@@ -65,7 +67,7 @@ export default function HScrollList({ className = '', children }: Props) {
 
     const onMove = (ev: MouseEvent) => {
       const dx = ev.pageX - startX.current
-      if (Math.abs(dx) > 3) hasDragged.current = true
+      if (Math.abs(dx) > 5) hasDragged.current = true
       el.scrollLeft = scrollLeftStart.current - dx
 
       const now = Date.now()
