@@ -27,8 +27,14 @@ export default async function DiagramPage({ params }: Props) {
 
   const isOwner = !!user && user.id === diagram.user_id
 
-  // 非公開かつ非所有者はアクセス拒否
-  if (!diagram.is_public && !isOwner) notFound()
+  // 非公開かつ非所有者はメッセージ表示
+  if (!diagram.is_public && !isOwner) {
+    return (
+      <div className="flex items-center justify-center h-full text-white/60 text-sm">
+        現在は非公開の相関図です。
+      </div>
+    )
+  }
 
   // 保存済みノード
   const { data: savedNodes } = await supabase
@@ -86,7 +92,6 @@ export default async function DiagramPage({ params }: Props) {
         isOwner={isOwner}
         initialIsPublic={diagram.is_public ?? false}
         viewerUserId={user?.id ?? null}
-        requiresLogin={diagram.is_public && !user}
       />
     </>
   )

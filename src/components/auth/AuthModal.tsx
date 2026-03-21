@@ -5,14 +5,13 @@ import { createClient } from '@/lib/supabase/client'
 
 interface Props {
   onClose: () => void
-  unclosable?: boolean
   message?: string
   onSuccess?: () => void
 }
 
 type Mode = 'login' | 'signup'
 
-export default function AuthModal({ onClose, unclosable = false, message, onSuccess }: Props) {
+export default function AuthModal({ onClose, message, onSuccess }: Props) {
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -52,17 +51,15 @@ export default function AuthModal({ onClose, unclosable = false, message, onSucc
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60${unclosable ? '' : ' backdrop-blur-sm'}`}
-      onClick={(e) => { if (!unclosable && e.target === e.currentTarget) onClose() }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="w-full max-w-sm mx-4 rounded-2xl bg-[#1a1a2e] border border-white/10 p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-white">
             {mode === 'login' ? 'ログイン' : '新規登録'}
           </h2>
-          {!unclosable && (
-            <button onClick={onClose} className="text-white/40 hover:text-white text-xl">×</button>
-          )}
+          <button onClick={onClose} className="text-white/40 hover:text-white text-xl">×</button>
         </div>
         {message && (
           <p className="text-white/60 text-sm text-center mb-4">{message}</p>

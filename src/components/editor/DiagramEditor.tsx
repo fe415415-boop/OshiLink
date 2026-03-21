@@ -10,8 +10,6 @@ import { createClient } from '@/lib/supabase/client'
 import CharacterPicker from './CharacterPicker'
 import DesignPanel from './DesignPanel'
 import SaveDownloadModal from './SaveDownloadModal'
-import AuthModal from '@/components/auth/AuthModal'
-
 const CytoscapeGraph = dynamic(() => import('./CytoscapeGraph'), { ssr: false })
 
 interface Props {
@@ -19,17 +17,15 @@ interface Props {
   isOwner?: boolean         // デフォルト true（新規作成時）
   initialIsPublic?: boolean // デフォルト false
   viewerUserId?: string | null
-  requiresLogin?: boolean   // 公開図 + 未ログイン時: true
 }
 
-export default function DiagramEditor({ diagramId, isOwner = true, initialIsPublic = false, viewerUserId, requiresLogin = false }: Props) {
+export default function DiagramEditor({ diagramId, isOwner = true, initialIsPublic = false, viewerUserId }: Props) {
   const router = useRouter()
   const cyRef = useRef<Core | null>(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [isPublic, setIsPublic] = useState(initialIsPublic)
   const [togglingPublic, setTogglingPublic] = useState(false)
   const [copying, setCopying] = useState(false)
-  const [canvasReady, setCanvasReady] = useState(false)
 
   const isReadOnly = isOwner === false
 
@@ -50,7 +46,6 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
   const fontFamily = FONT_FAMILIES[fontStyle]
 
   const handleCyReady = useCallback((cy: Core) => { cyRef.current = cy }, [])
-  const handleCanvasReady = useCallback(() => setCanvasReady(true), [])
 
   const handleToggleAutoLayout = useCallback(() => {
     if (isReadOnly) return
@@ -99,8 +94,9 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
     setTogglingPublic(false)
   }
 
-  async function handleCopyAndEdit() {
-    if (!diagramId || !viewerUserId) return
+  // 認証済みユーザー: DB にコピーして /diagram/{id} に遷移
+  async function doCopy(userId: string) {
+    if (!diagramId) return
     setCopying(true)
     const supabase = createClient()
 
@@ -112,7 +108,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
     const { data: newDiag } = await supabase
       .from('diagrams')
       .insert({
-        user_id: viewerUserId,
+        user_id: userId,
         template_id: storeTemplateId,
         title: storeTitle,
         design_template: template,
@@ -152,12 +148,28 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
     router.push(`/diagram/${newDiag.id}`)
   }
 
-  // requiresLogin 時のフォールバック：ノード0件など想定外ケースで 2 秒後に強制表示
-  useEffect(() => {
-    if (!requiresLogin) return
-    const t = setTimeout(() => setCanvasReady(true), 2000)
-    return () => clearTimeout(t)
-  }, [requiresLogin])
+  // 未ログインユーザー: store データを sessionStorage に保存して editor に遷移
+  function doCopyLocal() {
+    const state = useDiagramStore.getState()
+    const draft = {
+      templateId: state.templateId,
+      templateTitle: state.templateTitle,
+      characters: state.characters,
+      title: state.title,
+      template: state.template,
+      fontStyle: state.fontStyle,
+      nodes: state.nodes,
+      edges: state.edges,
+    }
+    sessionStorage.setItem('oshilink_copy_draft', JSON.stringify(draft))
+    router.push(`/editor/${state.templateId}`)
+  }
+
+  function handleCopyAndEdit() {
+    if (!diagramId) return
+    if (!viewerUserId) { doCopyLocal(); return }
+    doCopy(viewerUserId)
+  }
 
   useEffect(() => {
     if (nodes.length === 0 || isReadOnly) return
@@ -187,9 +199,9 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
       style={{ color: theme.nodeText, background: theme.background, fontFamily }}
     >
       {/* グラフエリア */}
-      <main className={`flex-1 relative overflow-hidden min-h-0${requiresLogin && canvasReady ? ' blur-sm brightness-75 pointer-events-none' : ''}`}>
-        {/* Undo/Redo ボタン（左上）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
-        {(!isReadOnly || requiresLogin) && (
+      <main className="flex-1 relative overflow-hidden min-h-0">
+        {/* Undo/Redo ボタン（左上）- 編集可能時のみ */}
+        {!isReadOnly && (
           <div className="absolute top-3 left-3 z-10 flex gap-1">
             <button
               onClick={undo}
@@ -212,15 +224,15 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
           </div>
         )}
 
-        {/* デザイン切り替え（右上フローティング）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
-        {(!isReadOnly || requiresLogin) && (
+        {/* デザイン切り替え（右上フローティング）- 編集可能時のみ */}
+        {!isReadOnly && (
           <div className="absolute top-3 right-3 z-10">
             <DesignPanel />
           </div>
         )}
 
-        {/* 保存/ダウンロードボタン（左下）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
-        {(!isReadOnly || requiresLogin) && (
+        {/* 保存/ダウンロードボタン（左下）- 編集可能時のみ */}
+        {!isReadOnly && (
           <button
             onClick={() => setShowSaveModal(true)}
             disabled={nodes.length === 0}
@@ -231,8 +243,8 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
           </button>
         )}
 
-        {/* コピーして編集ボタン（左下）- 公開かつ非所有者かつログイン済み */}
-        {isPublic && isReadOnly && viewerUserId && (
+        {/* コピーして編集ボタン（左下）- 公開かつ非所有者 */}
+        {isPublic && isReadOnly && (
           <button
             onClick={handleCopyAndEdit}
             disabled={copying}
@@ -271,19 +283,19 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
             autoLayout
               ? 'bg-violet-600 border-violet-400 text-white'
               : 'border-white/10 opacity-50 hover:opacity-80'
-          } ${isReadOnly && !requiresLogin ? 'hidden' : ''}`}
+          } ${isReadOnly ? 'hidden' : ''}`}
           style={{ background: autoLayout ? undefined : theme.panelBg, color: autoLayout ? undefined : theme.nodeText }}
         >
           自動整列
         </button>
 
-        <CytoscapeGraph onCyReady={handleCyReady} onCanvasReady={handleCanvasReady} isReadOnly={isReadOnly} />
+        <CytoscapeGraph onCyReady={handleCyReady} isReadOnly={isReadOnly} />
       </main>
 
-      {/* 人物フッター - 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
-      {(!isReadOnly || requiresLogin) && (
+      {/* 人物フッター - 編集可能時のみ */}
+      {!isReadOnly && (
         <footer
-          className={`shrink-0 border-t overflow-hidden${requiresLogin && canvasReady ? ' blur-sm brightness-75 pointer-events-none' : ''}`}
+          className="shrink-0 border-t overflow-hidden"
           style={{
             background: theme.panelBg,
             borderColor: theme.panelBorder,
@@ -298,15 +310,6 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
         <SaveDownloadModal cyRef={cyRef} onClose={() => setShowSaveModal(false)} />
       )}
 
-      {/* 未ログイン時：閉じられないログインモーダル（blur は AuthModal 側で制御） */}
-      {requiresLogin && canvasReady && (
-        <AuthModal
-          unclosable
-          message="閲覧・編集にはログインが必要です。"
-          onClose={() => {}}
-          onSuccess={() => window.location.reload()}
-        />
-      )}
     </div>
   )
 }

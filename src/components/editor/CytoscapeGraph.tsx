@@ -17,7 +17,6 @@ function registerFcose() {
 
 interface Props {
   onCyReady?: (cy: Core) => void
-  onCanvasReady?: () => void
   isReadOnly?: boolean
 }
 
@@ -45,7 +44,7 @@ interface ResizeState {
   pinnedModelY: number
 }
 
-export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = false }: Props) {
+export default function CytoscapeGraph({ onCyReady, isReadOnly = false }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Core | null>(null)
   const needsFitRef = useRef(true)   // 保存済みロード時に一度だけ fit
@@ -438,7 +437,6 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
           useDiagramStore.getState().updateNodePosition(n.id, x, y)
         })
         c.fit(undefined, 40)
-        requestAnimationFrame(() => onCanvasReady?.())
       })
     }
 
@@ -448,7 +446,6 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
       requestAnimationFrame(() => {
         if (!cyRef.current || cyRef.current.destroyed()) return
         cyRef.current.fit(undefined, 40)
-        requestAnimationFrame(() => onCanvasReady?.())
       })
     }
 
@@ -472,7 +469,6 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
           layout.one('layoutstop', () => {
             boxNodes.unlock()
             c.fit(undefined, 40)
-            requestAnimationFrame(() => onCanvasReady?.())
             // レイアウト後の実座標を store に保存（次回保存時に正しい位置が書き込まれる）
             c.nodes('[nodeType!="box"]').forEach((n) => {
               const pos = n.position()
@@ -487,7 +483,6 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
             layout2.one('layoutstop', () => {
               boxNodes.unlock()
               c.fit(undefined, 40)
-              requestAnimationFrame(() => onCanvasReady?.())
               c.nodes('[nodeType!="box"]').forEach((n) => {
                 const pos = n.position()
                 useDiagramStore.getState().updateNodePosition(n.data('storeId'), pos.x, pos.y)
