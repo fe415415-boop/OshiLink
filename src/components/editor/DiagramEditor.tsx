@@ -152,6 +152,13 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
     router.push(`/diagram/${newDiag.id}`)
   }
 
+  // requiresLogin 時のフォールバック：ノード0件など想定外ケースで 2 秒後に強制表示
+  useEffect(() => {
+    if (!requiresLogin) return
+    const t = setTimeout(() => setCanvasReady(true), 2000)
+    return () => clearTimeout(t)
+  }, [requiresLogin])
+
   useEffect(() => {
     if (nodes.length === 0 || isReadOnly) return
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {

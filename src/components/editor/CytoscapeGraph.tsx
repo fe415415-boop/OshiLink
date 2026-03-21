@@ -442,9 +442,6 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
       })
     }
 
-    // ノードが0件のとき（空の相関図）は即座に ready
-    if (nodes.length === 0) onCanvasReady?.()
-
     // 保存済みデータからの復元（全ノード位置あり）→ レイアウト不要、一度だけ fit
     if (nodes.length > 0 && newNodeCount === 0 && needsFitRef.current) {
       needsFitRef.current = false
