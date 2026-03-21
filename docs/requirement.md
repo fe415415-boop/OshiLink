@@ -62,7 +62,12 @@
 - **非オーナー × 公開**：自動コピーリダイレクト
   - ログイン済み → サーバーサイドで DB コピー（diagrams + diagram_nodes + diagram_edges）→ `/diagram/{newId}` にリダイレクト
   - 未ログイン → `AutoCopyRedirect` コンポーネントで `sessionStorage('oshilink_copy_draft')` に保存 → `/editor/{templateId}` にリダイレクト
-- **非オーナー × 非公開**：「現在は非公開の相関図です。」メッセージ表示
+- **非オーナー × 非公開**：`/not-public` にリダイレクト
+
+### `/not-public` — 非公開相関図メッセージ
+- 「現在は非公開の相関図です。」を表示
+- `/diagram/[id]` からのリダイレクト専用ページ
+- 注: `/diagram/private` は動的ルート `/diagram/[id]` と衝突して 404 になるため、`/diagram/` 配下には置かない
 
 ### `/auth/callback` — OAuth コールバック
 - Supabase OAuth リダイレクト処理
@@ -301,7 +306,7 @@ templates (id, title, user_id[nullable], forked_from[nullable], usage_count, fav
 template_characters (id, template_id, name, image_url[nullable], sort_order)
 
 -- 相関図
-diagrams (id, user_id, template_id, title, design_template, font_style, thumbnail[base64], created_at)
+diagrams (id, user_id, template_id, title, design_template, font_style, is_public[boolean, default false], thumbnail[base64], created_at)
 
 -- 相関図のノード
 diagram_nodes (id, diagram_id, character_id → ON DELETE CASCADE, pos_x, pos_y)
@@ -322,7 +327,7 @@ admins (user_id)
 |---------|--------|----------------------|
 | templates | 全員 | 作成者 or 管理者 |
 | template_characters | 全員 | テンプレート作成者 or 管理者 |
-| diagrams | 本人のみ | 本人のみ |
+| diagrams | 本人 or `is_public=true` | 本人のみ |
 | diagram_nodes | 本人 or `is_public=true` の相関図 | 本人のみ |
 | diagram_edges | 本人 or `is_public=true` の相関図 | 本人のみ |
 | template_favorites | 本人のみ | 本人のみ |
@@ -365,6 +370,7 @@ admins (user_id)
 4. `supabase/migrations/safe_delete_template.sql` — テンプレート安全削除 RPC（`is_admin()` 依存）
 5. `supabase/migrations/count_character_usages.sql` — キャラクター使用カウント RPC
 6. `supabase/migrations/public_diagram_read.sql` — 公開相関図の nodes/edges を非オーナーも読み取り可能にする RLS 更新
+7. `supabase/migrations/public_diagram_select.sql` — 公開相関図の diagrams 本体を非オーナーも読み取り可能にする RLS 更新
 
 ---
 
@@ -417,3 +423,9 @@ admins (user_id)
 3. **メール/パスワードログイン**：フォーム入力 → 即座にログイン
 4. セッションは `localStorage` に自動保存（Supabase 標準）
 5. `AuthProvider` で初期化、`authStore` で保持
+
+### ログイン・ログアウト後のページ更新
+
+- **ログイン成功時**：`AuthModal` の `onSuccess` で `router.refresh()` を呼び出し、サーバーコンポーネントを再フェッチ → トップページの「作成したリンク」が即座に表示される
+- **ログアウト時**：`handleLogout` で `signOut()` 後に `router.refresh()` を呼び出し → 「作成したリンク」が即座に非表示になる
+- 実装場所：`Header.tsx`
