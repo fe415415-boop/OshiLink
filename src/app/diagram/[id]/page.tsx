@@ -30,7 +30,7 @@ export default async function DiagramPage({ params }: Props) {
 
   // 非公開かつ非所有者はメッセージページにリダイレクト
   if (!isOwner && !diagram.is_public) {
-    redirect('/diagram/private')
+    redirect('/not-public')
   }
 
   const template = diagram.templates as { id: string; title: string; template_characters: TemplateCharacter[] }
