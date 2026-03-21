@@ -17,12 +17,16 @@ export default function CharacterPicker() {
   const startX = useRef(0)
   const scrollLeftStart = useRef(0)
   const animFrame = useRef<number | null>(null)
+  const activeOnMove = useRef<((ev: MouseEvent) => void) | null>(null)
+  const activeOnUp = useRef<(() => void) | null>(null)
 
   function handleMouseDown(e: React.MouseEvent) {
     if (!scrollRef.current) return
     const el = scrollRef.current
 
-    // 慣性アニメーション中なら停止
+    // 前回のドラッグリスナーが残っていれば先に解除
+    if (activeOnMove.current) window.removeEventListener('mousemove', activeOnMove.current)
+    if (activeOnUp.current) window.removeEventListener('mouseup', activeOnUp.current)
     if (animFrame.current !== null) {
       cancelAnimationFrame(animFrame.current)
       animFrame.current = null
@@ -33,10 +37,9 @@ export default function CharacterPicker() {
     scrollLeftStart.current = el.scrollLeft
     el.style.cursor = 'grabbing'
 
-    // 速度追跡（16ms 以上経過した時点でのみ更新してノイズを抑える）
     let prevX = e.pageX
     let prevTime = Date.now()
-    let velocity = 0  // px/ms（正=右スクロール方向）
+    let velocity = 0
 
     const onMove = (ev: MouseEvent) => {
       const dx = ev.pageX - startX.current
@@ -53,13 +56,14 @@ export default function CharacterPicker() {
     }
 
     const onUp = () => {
+      activeOnMove.current = null
+      activeOnUp.current = null
       el.style.cursor = 'grab'
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
 
-      // 慣性スクロール
       if (Math.abs(velocity) > 0.05) {
-        let v = velocity * 16  // px/frame (60fps 想定)
+        let v = velocity * 16
         const step = () => {
           if (Math.abs(v) < 0.5) { animFrame.current = null; return }
           el.scrollLeft += v
@@ -70,6 +74,8 @@ export default function CharacterPicker() {
       }
     }
 
+    activeOnMove.current = onMove
+    activeOnUp.current = onUp
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
   }

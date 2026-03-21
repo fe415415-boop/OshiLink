@@ -13,6 +13,8 @@ export default function HScrollList({ className = '', children }: Props) {
   const startX = useRef(0)
   const scrollLeftStart = useRef(0)
   const animFrame = useRef<number | null>(null)
+  const activeOnMove = useRef<((ev: MouseEvent) => void) | null>(null)
+  const activeOnUp = useRef<(() => void) | null>(null)
   const [showLeft, setShowLeft] = useState(false)
   const [showRight, setShowRight] = useState(false)
 
@@ -33,6 +35,10 @@ export default function HScrollList({ className = '', children }: Props) {
     return () => {
       el.removeEventListener('scroll', updateIndicators)
       ro.disconnect()
+      // アンマウント時に残留リスナーを確実に解除
+      if (activeOnMove.current) window.removeEventListener('mousemove', activeOnMove.current)
+      if (activeOnUp.current) window.removeEventListener('mouseup', activeOnUp.current)
+      if (animFrame.current !== null) cancelAnimationFrame(animFrame.current)
     }
   }, [updateIndicators])
 
@@ -40,6 +46,9 @@ export default function HScrollList({ className = '', children }: Props) {
     if (!scrollRef.current) return
     const el = scrollRef.current
 
+    // 前回のドラッグリスナーが残っていれば先に解除
+    if (activeOnMove.current) window.removeEventListener('mousemove', activeOnMove.current)
+    if (activeOnUp.current) window.removeEventListener('mouseup', activeOnUp.current)
     if (animFrame.current !== null) {
       cancelAnimationFrame(animFrame.current)
       animFrame.current = null
@@ -69,6 +78,8 @@ export default function HScrollList({ className = '', children }: Props) {
     }
 
     const onUp = () => {
+      activeOnMove.current = null
+      activeOnUp.current = null
       el.style.cursor = ''
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
@@ -85,6 +96,8 @@ export default function HScrollList({ className = '', children }: Props) {
       }
     }
 
+    activeOnMove.current = onMove
+    activeOnUp.current = onUp
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
   }
