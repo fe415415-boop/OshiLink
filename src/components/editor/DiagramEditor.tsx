@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import CharacterPicker from './CharacterPicker'
 import DesignPanel from './DesignPanel'
 import SaveDownloadModal from './SaveDownloadModal'
+import AuthModal from '@/components/auth/AuthModal'
 
 const CytoscapeGraph = dynamic(() => import('./CytoscapeGraph'), { ssr: false })
 
@@ -18,9 +19,10 @@ interface Props {
   isOwner?: boolean         // デフォルト true（新規作成時）
   initialIsPublic?: boolean // デフォルト false
   viewerUserId?: string | null
+  requiresLogin?: boolean   // 公開図 + 未ログイン時: true
 }
 
-export default function DiagramEditor({ diagramId, isOwner = true, initialIsPublic = false, viewerUserId }: Props) {
+export default function DiagramEditor({ diagramId, isOwner = true, initialIsPublic = false, viewerUserId, requiresLogin = false }: Props) {
   const router = useRouter()
   const cyRef = useRef<Core | null>(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
@@ -285,6 +287,19 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
 
       {showSaveModal && (
         <SaveDownloadModal cyRef={cyRef} onClose={() => setShowSaveModal(false)} />
+      )}
+
+      {/* 未ログイン時：ブラーオーバーレイ＋閉じられないログインモーダル */}
+      {requiresLogin && (
+        <>
+          <div className="absolute inset-0 z-40 backdrop-blur-md bg-black/40 pointer-events-none" />
+          <AuthModal
+            unclosable
+            message="閲覧・編集にはログインが必要です。"
+            onClose={() => {}}
+            onSuccess={() => window.location.reload()}
+          />
+        </>
       )}
     </div>
   )

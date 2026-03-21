@@ -86,6 +86,7 @@ export default async function DiagramPage({ params }: Props) {
         isOwner={isOwner}
         initialIsPublic={diagram.is_public ?? false}
         viewerUserId={user?.id ?? null}
+        requiresLogin={diagram.is_public && !user}
       />
     </>
   )
