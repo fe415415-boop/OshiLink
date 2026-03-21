@@ -31,6 +31,7 @@ export default function Header() {
     const supabase = createClient()
     await supabase.auth.signOut()
     setProfileOpen(false)
+    router.refresh()
   }
 
   function handleSearch(e: React.FormEvent) {
@@ -146,7 +147,12 @@ export default function Header() {
         </div>
       </header>
 
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+      {showAuth && (
+        <AuthModal
+          onClose={() => setShowAuth(false)}
+          onSuccess={() => { setShowAuth(false); router.refresh() }}
+        />
+      )}
     </>
   )
 }
