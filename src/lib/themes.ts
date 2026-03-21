@@ -116,14 +116,8 @@ export const TAG_COLORS: Record<string, string> = {
   親友: '#3b82f6',
   相棒: '#8b5cf6',
   ライバル: '#ef4444',
-  てぇてぇ: '#ec4899',
-  師弟: '#f59e0b',
-  尊敬: '#10b981',
-  不仲: '#6b7280',
-  仲間: '#14b8a6',
   ビジネス: '#06b6d4',
-  ハート: '#f43f5e',
-  敵: '#dc2626',
+  '♥': '#f43f5e',
 }
 
 export function getTagColor(tag: RelationTag, theme: ThemeConfig): string {

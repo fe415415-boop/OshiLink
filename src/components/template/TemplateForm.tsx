@@ -323,17 +323,24 @@ export default function TemplateForm({ initialTitle = '', initialCharacters = []
           {characters.map((c, idx) => (
             <div key={c.id} className="flex items-center gap-3 rounded-xl bg-white/5 border border-white/10 p-3">
               {/* 画像 */}
-              <button
-                onClick={() => handleImageClick(idx)}
-                className="shrink-0 w-12 h-12 rounded-full bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center text-white/30 hover:border-violet-500 transition-colors"
-              >
-                {c.imagePreview ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.imagePreview} alt={c.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-xl">📷</span>
+              <div className="relative shrink-0 w-12 h-12">
+                <button
+                  onClick={() => handleImageClick(idx)}
+                  className="w-full h-full rounded-full bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center text-white/30 hover:border-violet-500 transition-colors"
+                >
+                  {c.imagePreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={c.imagePreview} alt={c.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-xl">📷</span>
+                  )}
+                </button>
+                {!c.imagePreview && (
+                  <span className="absolute top-0 right-0 w-4 h-4 rounded-full bg-violet-500 text-white text-[11px] font-bold grid place-items-center pointer-events-none">
+                    +
+                  </span>
                 )}
-              </button>
+              </div>
 
               {/* 名前 */}
               <input

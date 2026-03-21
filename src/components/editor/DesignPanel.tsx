@@ -3,19 +3,13 @@
 import { useState } from 'react'
 import { useDiagramStore, Template, FontStyle } from '@/store/diagramStore'
 import { TEMPLATE_LABELS, FONT_LABELS, FONT_FAMILIES, THEMES } from '@/lib/themes'
-import type { Core } from 'cytoscape'
 
 const TEMPLATES: Template[] = ['stylish', 'pink', 'simple', 'night', 'sunset', 'mint']
 const FONTS: FontStyle[] = ['cool', 'pop', 'emo', 'elegant']
 
-interface Props {
-  cyRef: React.RefObject<Core | null>
-}
-
-export default function DesignPanel({ cyRef }: Props) {
+export default function DesignPanel() {
   const template = useDiagramStore((s) => s.template)
   const fontStyle = useDiagramStore((s) => s.fontStyle)
-  const nodes = useDiagramStore((s) => s.nodes)
   const drawMode = useDiagramStore((s) => s.drawMode)
   const setTemplate = useDiagramStore((s) => s.setTemplate)
   const setFontStyle = useDiagramStore((s) => s.setFontStyle)
@@ -24,48 +18,6 @@ export default function DesignPanel({ cyRef }: Props) {
 
   const [designOpen, setDesignOpen] = useState(false)
   const [fontOpen, setFontOpen] = useState(false)
-
-  function handleAutoLayout() {
-    const c = cyRef.current
-    if (!c || c.destroyed()) return
-    const boxNodes = c.nodes('[nodeType="box"]')
-    boxNodes.lock()
-    try {
-      const layout = c.layout({
-        name: 'fcose',
-        animate: true,
-        animationDuration: 400,
-        randomize: false,
-        nodeRepulsion: 6000,
-        idealEdgeLength: 150,
-        nodeDimensionsIncludeLabels: true,
-        fit: false,
-      } as Parameters<Core['layout']>[0])
-      layout.one('layoutstop', () => {
-        boxNodes.unlock()
-        c.fit(undefined, 40)
-        c.nodes('[nodeType!="box"]').forEach((n) => {
-          const pos = n.position()
-          useDiagramStore.getState().updateNodePosition(n.data('storeId'), pos.x, pos.y)
-        })
-      })
-      layout.run()
-    } catch {
-      boxNodes.unlock()
-      try {
-        const layout2 = c.layout({ name: 'cose', animate: true, fit: false })
-        layout2.one('layoutstop', () => {
-          boxNodes.unlock()
-          c.fit(undefined, 40)
-          c.nodes('[nodeType!="box"]').forEach((n) => {
-            const pos = n.position()
-            useDiagramStore.getState().updateNodePosition(n.data('storeId'), pos.x, pos.y)
-          })
-        })
-        layout2.run()
-      } catch { boxNodes.unlock() }
-    }
-  }
 
   const btnBase = 'h-8 px-2.5 rounded-lg text-xs font-bold transition-all border flex items-center justify-center whitespace-nowrap'
 
@@ -88,17 +40,6 @@ export default function DesignPanel({ cyRef }: Props) {
           style={{ color: drawMode ? undefined : theme.nodeText }}
         >
           囲む
-        </button>
-
-        {/* 整列 */}
-        <button
-          onClick={handleAutoLayout}
-          disabled={nodes.length === 0}
-          title="自動整列"
-          className={`${btnBase} bg-white/5 border-white/10 opacity-60 hover:opacity-90 disabled:opacity-20`}
-          style={{ color: theme.nodeText }}
-        >
-          整列
         </button>
 
         {/* デザイン */}

@@ -13,6 +13,9 @@ export default async function DiagramPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
+  // ログイン中ユーザーを取得
+  const { data: { user } } = await supabase.auth.getUser()
+
   // 相関図本体 + テンプレート情報
   const { data: diagram } = await supabase
     .from('diagrams')
@@ -21,6 +24,11 @@ export default async function DiagramPage({ params }: Props) {
     .single()
 
   if (!diagram) notFound()
+
+  const isOwner = !!user && user.id === diagram.user_id
+
+  // 非公開かつ非所有者はアクセス拒否
+  if (!diagram.is_public && !isOwner) notFound()
 
   // 保存済みノード
   const { data: savedNodes } = await supabase
@@ -73,7 +81,12 @@ export default async function DiagramPage({ params }: Props) {
           edges: editorEdges,
         }}
       />
-      <DiagramEditor />
+      <DiagramEditor
+        diagramId={id}
+        isOwner={isOwner}
+        initialIsPublic={diagram.is_public ?? false}
+        viewerUserId={user?.id ?? null}
+      />
     </>
   )
 }

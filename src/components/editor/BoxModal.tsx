@@ -12,22 +12,28 @@ const COLOR_PRESETS = [
   '#e8eaf6', '#fce4ec', '#e8f5e9', '#fff8e1', '#e0f7fa', '#f3e5f5',
 ]
 
+type TextAlign = 'left' | 'center' | 'right'
+
 interface Props {
   boxId: string
   initialColor: string
+  initialOpacity: number
   initialText: string
+  initialTextAlign?: TextAlign
   onClose: () => void
 }
 
-export default function BoxModal({ boxId, initialColor, initialText, onClose }: Props) {
+export default function BoxModal({ boxId, initialColor, initialOpacity, initialText, initialTextAlign = 'left', onClose }: Props) {
   const updateBox = useDiagramStore((s) => s.updateBox)
   const removeBox = useDiagramStore((s) => s.removeBox)
 
   const [color, setColor] = useState(initialColor)
+  const [opacity, setOpacity] = useState(initialOpacity)
   const [text, setText] = useState(initialText)
+  const [textAlign, setTextAlign] = useState<TextAlign>(initialTextAlign)
 
   function handleConfirm() {
-    updateBox(boxId, { color, text })
+    updateBox(boxId, { color, opacity, text, textAlign })
     onClose()
   }
 
@@ -35,6 +41,12 @@ export default function BoxModal({ boxId, initialColor, initialText, onClose }: 
     removeBox(boxId)
     onClose()
   }
+
+  const ALIGN_OPTIONS: { value: TextAlign; label: string }[] = [
+    { value: 'left',   label: '左揃え' },
+    { value: 'center', label: '中央揃え' },
+    { value: 'right',  label: '右揃え' },
+  ]
 
   return (
     <div
@@ -72,9 +84,25 @@ export default function BoxModal({ boxId, initialColor, initialText, onClose }: 
           </div>
         </div>
 
-        {/* テキスト */}
+        {/* 透明度 */}
         <div className="mb-4">
-          <p className="text-xs text-white/40 mb-2">テキスト（左上揃え）</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs text-white/40">透明度</p>
+            <span className="text-xs text-white/30 font-mono">{Math.round(opacity * 100)}%</span>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={Math.round(opacity * 100)}
+            onChange={(e) => setOpacity(Number(e.target.value) / 100)}
+            className="w-full accent-violet-500"
+          />
+        </div>
+
+        {/* テキスト */}
+        <div className="mb-3">
+          <p className="text-xs text-white/40 mb-2">テキスト</p>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -82,7 +110,25 @@ export default function BoxModal({ boxId, initialColor, initialText, onClose }: 
             rows={3}
             autoFocus
             className="w-full rounded-lg px-3 py-2 bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-violet-500 placeholder:text-white/25 resize-none"
+            style={{ textAlign }}
           />
+        </div>
+
+        {/* テキスト揃え */}
+        <div className="mb-4 flex gap-1.5">
+          {ALIGN_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setTextAlign(opt.value)}
+              className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                textAlign === opt.value
+                  ? 'bg-violet-600 border-violet-400 text-white'
+                  : 'bg-white/5 border-white/10 text-white/40 hover:text-white/70'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
 
         <div className="flex gap-2">
