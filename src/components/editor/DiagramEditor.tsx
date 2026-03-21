@@ -179,8 +179,8 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
     >
       {/* グラフエリア */}
       <main className="flex-1 relative overflow-hidden min-h-0">
-        {/* Undo/Redo ボタン（左上）- 編集可能時のみ */}
-        {!isReadOnly && (
+        {/* Undo/Redo ボタン（左上）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
+        {(!isReadOnly || requiresLogin) && (
           <div className="absolute top-3 left-3 z-10 flex gap-1">
             <button
               onClick={undo}
@@ -203,15 +203,15 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
           </div>
         )}
 
-        {/* デザイン切り替え（右上フローティング）- 編集可能時のみ */}
-        {!isReadOnly && (
+        {/* デザイン切り替え（右上フローティング）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
+        {(!isReadOnly || requiresLogin) && (
           <div className="absolute top-3 right-3 z-10">
             <DesignPanel />
           </div>
         )}
 
-        {/* 保存/ダウンロードボタン（左下）- 編集可能時のみ */}
-        {!isReadOnly && (
+        {/* 保存/ダウンロードボタン（左下）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
+        {(!isReadOnly || requiresLogin) && (
           <button
             onClick={() => setShowSaveModal(true)}
             disabled={nodes.length === 0}
@@ -262,7 +262,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
             autoLayout
               ? 'bg-violet-600 border-violet-400 text-white'
               : 'border-white/10 opacity-50 hover:opacity-80'
-          } ${isReadOnly ? 'hidden' : ''}`}
+          } ${isReadOnly && !requiresLogin ? 'hidden' : ''}`}
           style={{ background: autoLayout ? undefined : theme.panelBg, color: autoLayout ? undefined : theme.nodeText }}
         >
           自動整列
@@ -271,8 +271,8 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
         <CytoscapeGraph onCyReady={handleCyReady} isReadOnly={isReadOnly} />
       </main>
 
-      {/* 人物フッター - 編集可能時のみ */}
-      {!isReadOnly && (
+      {/* 人物フッター - 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
+      {(!isReadOnly || requiresLogin) && (
         <footer
           className="shrink-0 border-t overflow-hidden"
           style={{
