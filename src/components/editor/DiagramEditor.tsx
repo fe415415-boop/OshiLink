@@ -289,17 +289,14 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
         <SaveDownloadModal cyRef={cyRef} onClose={() => setShowSaveModal(false)} />
       )}
 
-      {/* 未ログイン時：ブラーオーバーレイ＋閉じられないログインモーダル */}
+      {/* 未ログイン時：閉じられないログインモーダル（blur は AuthModal 側で制御） */}
       {requiresLogin && (
-        <>
-          <div className="absolute inset-0 z-40 backdrop-blur-md bg-black/40 pointer-events-none" />
-          <AuthModal
-            unclosable
-            message="閲覧・編集にはログインが必要です。"
-            onClose={() => {}}
-            onSuccess={() => window.location.reload()}
-          />
-        </>
+        <AuthModal
+          unclosable
+          message="閲覧・編集にはログインが必要です。"
+          onClose={() => {}}
+          onSuccess={() => window.location.reload()}
+        />
       )}
     </div>
   )
