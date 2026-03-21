@@ -29,6 +29,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
   const [isPublic, setIsPublic] = useState(initialIsPublic)
   const [togglingPublic, setTogglingPublic] = useState(false)
   const [copying, setCopying] = useState(false)
+  const [canvasReady, setCanvasReady] = useState(false)
 
   const isReadOnly = isOwner === false
 
@@ -49,6 +50,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
   const fontFamily = FONT_FAMILIES[fontStyle]
 
   const handleCyReady = useCallback((cy: Core) => { cyRef.current = cy }, [])
+  const handleCanvasReady = useCallback(() => setCanvasReady(true), [])
 
   const handleToggleAutoLayout = useCallback(() => {
     if (isReadOnly) return
@@ -268,7 +270,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
           自動整列
         </button>
 
-        <CytoscapeGraph onCyReady={handleCyReady} isReadOnly={isReadOnly} />
+        <CytoscapeGraph onCyReady={handleCyReady} onCanvasReady={handleCanvasReady} isReadOnly={isReadOnly} />
       </main>
 
       {/* 人物フッター - 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
@@ -290,7 +292,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
       )}
 
       {/* 未ログイン時：閉じられないログインモーダル（blur は AuthModal 側で制御） */}
-      {requiresLogin && (
+      {requiresLogin && canvasReady && (
         <AuthModal
           unclosable
           message="閲覧・編集にはログインが必要です。"
