@@ -193,7 +193,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
         style={{
           background: theme.panelBg,
           borderColor: theme.panelBorder,
-          height: '88px',
+          height: '96px',
         }}
       >
         <CharacterPicker />

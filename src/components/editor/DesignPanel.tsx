@@ -22,10 +22,7 @@ export default function DesignPanel() {
   const btnBase = 'h-8 px-2.5 rounded-lg text-xs font-bold transition-all border flex items-center justify-center whitespace-nowrap'
 
   return (
-    <div
-      className="rounded-xl border backdrop-blur-sm p-1.5 flex flex-col gap-1 shadow-xl"
-      style={{ background: `${theme.panelBg}dd`, borderColor: theme.panelBorder }}
-    >
+    <div className="flex flex-col items-end gap-1">
       {/* 横並びボタン行 */}
       <div className="flex gap-1">
         {/* 囲む */}
@@ -63,7 +60,7 @@ export default function DesignPanel() {
 
       {/* デザイン展開 */}
       {designOpen && (
-        <div className="flex gap-1 flex-wrap">
+        <div className="flex gap-1 flex-wrap rounded-xl p-1.5 backdrop-blur-sm shadow-xl" style={{ background: `${theme.panelBg}dd` }}>
           {TEMPLATES.map((t) => {
             const th = THEMES[t]
             const isActive = template === t
@@ -89,7 +86,7 @@ export default function DesignPanel() {
 
       {/* フォント展開 */}
       {fontOpen && (
-        <div className="flex gap-1">
+        <div className="flex gap-1 rounded-xl p-1.5 backdrop-blur-sm shadow-xl" style={{ background: `${theme.panelBg}dd` }}>
           {FONTS.map((f) => {
             const isActive = fontStyle === f
             return (

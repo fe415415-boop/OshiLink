@@ -20,14 +20,14 @@
 - 「人気テンプレート」グリッドを表示（`usage_count + favorites_count` 降順、上位 48 件）
 - 検索フォーム：クエリパラメータ `q` で `title ILIKE %q%` 検索
 - テンプレートカードにはお気に入りボタン表示（ログイン済みのみ機能）
-- モバイルでは横スクロール、sm 以上ではグリッド表示
+- 全画面サイズで横スクロール1行表示（`w-44` 固定幅カード、`max-w-6xl` コンテナ）
 
 ### `/profile` — マイページ
 - ログイン必須（未ログインで `/` にリダイレクト）
 - セクション 1：**作成したリンク** — DiagramCard グリッド（削除ボタン付き）
 - セクション 2：**作成したテンプレート** — TemplateCard グリッド
 - セクション 3：**お気に入りテンプレート** — TemplateCard グリッド
-- モバイルでは横スクロール、sm 以上ではグリッド表示
+- 全画面サイズで横スクロール1行表示（`w-44` 固定幅カード、`max-w-6xl` コンテナ）
 
 ### `/template/[id]` — テンプレート詳細
 - タイトル・使用回数・お気に入り数を表示（`使用回数 N · お気に入り数 N`）
@@ -58,8 +58,11 @@
 - `EditorInitializer` で store 初期化
 
 ### `/diagram/[id]` — 保存済み相関図エディタ
-- 保存済み相関図を復元して編集
-- `DiagramLoader` で store 初期化
+- **オーナー**：保存済み相関図を復元して編集（`DiagramLoader` で store 初期化）
+- **非オーナー × 公開**：自動コピーリダイレクト
+  - ログイン済み → サーバーサイドで DB コピー（diagrams + diagram_nodes + diagram_edges）→ `/diagram/{newId}` にリダイレクト
+  - 未ログイン → `AutoCopyRedirect` コンポーネントで `sessionStorage('oshilink_copy_draft')` に保存 → `/editor/{templateId}` にリダイレクト
+- **非オーナー × 非公開**：「現在は非公開の相関図です。」メッセージ表示
 
 ### `/auth/callback` — OAuth コールバック
 - Supabase OAuth リダイレクト処理
@@ -70,9 +73,12 @@
 
 ### 3-1. レイアウト（DiagramEditor）
 - 上部：グラフキャンバス
+  - 左上：Undo / Redo ボタン
   - 右上フローティング：**DesignPanel**
   - 左下：「↓ 保存 / ダウンロード」ボタン（ノードが1件以上のとき有効）
-- 下部フッター（高さ 88px）：**CharacterPicker**
+  - 右下：「自動整列」トグルボタン
+  - 右下（自動整列の左隣・保存済み相関図のみ）：「公開中 / 非公開」トグルボタン
+- 下部フッター（高さ 96px）：**CharacterPicker**（ドラッグによる慣性スクロール対応）
 - 画面離脱時に未保存ノードがあれば確認ダイアログ（`beforeunload` + `history.pushState` パッチ）
 
 ### 3-2. グラフキャンバス（CytoscapeGraph）
@@ -117,22 +123,25 @@
 
 ### 3-3. DesignPanel（右上フローティングパネル）
 
-#### ボタン構成（横一列）
+#### ボタン構成（横一列、外側コンテナの枠線なし）
 | ボタン | 機能 |
 |--------|------|
 | **囲む** | ドローモード ON/OFF（ドロー中は紫ハイライト） |
-| **整列** | fcose 自動整列を手動実行（ノード 0 件時は disabled） |
 | **デザイン** | クリックでデザインテーマ選択を展開/収納 |
 | **フォント** | クリックでフォント選択を展開/収納 |
 
-- デザイン展開時：6種テーマのノード色プレビュー円を横並び表示
-- フォント展開時：4種フォントの「あ」ボタンを横並び表示
+- デザイン展開時：6種テーマのノード色プレビュー円を横並び表示（テーマ色背景・影付きパネル）
+- フォント展開時：4種フォントの「あ」ボタンを横並び表示（テーマ色背景・影付きパネル）
 - デザインとフォントは同時展開不可（片方を開くともう片方は閉じる）
+- ボタン行自体はコンテナ枠線なし・背景なし（各ボタンが個別に `bg-white/5 border-white/10` を持つ）
 
 ### 3-4. CharacterPicker（フッター）
 - 未追加の人物：左側に表示（50音順）
 - 追加済みの人物：右側に表示（グレーアウト＋チェックマーク）
 - クリックで新規ノードを追加（追加済みは無効）
+- PC：左クリックドラッグで横スクロール（ドラッグ後は慣性スクロール、ドラッグ中はクリック判定を抑制）
+- スマホ：ネイティブスワイプでスクロール
+- 人物名は最大2行まで見切れずに表示（`line-clamp-2`、フッター高さ 96px で収容）
 
 ### 3-5. ConnectionModal
 - タグ：テキスト自由入力
@@ -314,8 +323,8 @@ admins (user_id)
 | templates | 全員 | 作成者 or 管理者 |
 | template_characters | 全員 | テンプレート作成者 or 管理者 |
 | diagrams | 本人のみ | 本人のみ |
-| diagram_nodes | 本人のみ | 本人のみ |
-| diagram_edges | 本人のみ | 本人のみ |
+| diagram_nodes | 本人 or `is_public=true` の相関図 | 本人のみ |
+| diagram_edges | 本人 or `is_public=true` の相関図 | 本人のみ |
 | template_favorites | 本人のみ | 本人のみ |
 | admins | 全員 | — |
 
@@ -355,6 +364,7 @@ admins (user_id)
 3. `supabase/migrations/admin_role.sql` — 管理者ロール（`admins` テーブル・`is_admin()` 関数・RLS 更新）
 4. `supabase/migrations/safe_delete_template.sql` — テンプレート安全削除 RPC（`is_admin()` 依存）
 5. `supabase/migrations/count_character_usages.sql` — キャラクター使用カウント RPC
+6. `supabase/migrations/public_diagram_read.sql` — 公開相関図の nodes/edges を非オーナーも読み取り可能にする RLS 更新
 
 ---
 
@@ -376,7 +386,7 @@ admins (user_id)
 
 ### エディタ
 - 「↓ 保存 / ダウンロード」
-- DesignPanel：「囲む」「整列」「デザイン」「フォント」
+- DesignPanel：「囲む」「デザイン」「フォント」
 - ヒント：「下のバーからアイコンをタップして追加！」「接続先のノードをクリック（背景クリックでキャンセル）」「ドラッグで図形を作成（ESCでキャンセル）」
 - 離脱確認：「未保存の編集があります。ページを離れますか？」
 

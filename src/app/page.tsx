@@ -69,7 +69,7 @@ export default async function TopPage({ searchParams }: Props) {
         {user && !q && diagrams.length > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-bold text-white/50 mb-4">作成したリンク</h2>
-            <HScrollList className="gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <HScrollList className="gap-3 pb-1 ">
               {diagrams.map((d) => {
                 const tmpl = d.templates as { id: string; title: string; template_characters: TemplateCharacter[] } | null
                 const characters: TemplateCharacter[] = tmpl?.template_characters ?? []
@@ -83,7 +83,7 @@ export default async function TopPage({ searchParams }: Props) {
                   id: e.id, sourceId: e.source_node_id, targetId: e.target_node_id, tag: e.tag, direction: e.direction as EdgeDirection,
                 }))
                 return (
-                  <div key={d.id} className="shrink-0 w-44 sm:w-auto">
+                  <div key={d.id} className="shrink-0 w-44">
                   <DiagramCard
                     id={d.id}
                     title={d.title}
@@ -109,9 +109,9 @@ export default async function TopPage({ searchParams }: Props) {
 
         {/* テンプレート一覧 */}
         {templates.length > 0 ? (
-          <HScrollList className="gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <HScrollList className="gap-3 pb-1 ">
             {(templates as unknown as TemplateWithCharacters[]).map((t) => (
-              <div key={t.id} className="shrink-0 w-44 sm:w-auto">
+              <div key={t.id} className="shrink-0 w-44">
                 <TemplateCard template={t} isFavorited={favoriteIds.has(t.id)} userId={user?.id ?? null} />
               </div>
             ))}
