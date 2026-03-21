@@ -52,7 +52,7 @@ export default function AuthModal({ onClose, unclosable = false, message, onSucc
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60${unclosable ? '' : ' backdrop-blur-sm'}`}
       onClick={(e) => { if (!unclosable && e.target === e.currentTarget) onClose() }}
     >
       <div className="w-full max-w-sm mx-4 rounded-2xl bg-[#1a1a2e] border border-white/10 p-6 shadow-2xl">

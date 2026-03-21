@@ -187,7 +187,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
       style={{ color: theme.nodeText, background: theme.background, fontFamily }}
     >
       {/* グラフエリア */}
-      <main className="flex-1 relative overflow-hidden min-h-0">
+      <main className={`flex-1 relative overflow-hidden min-h-0${requiresLogin && canvasReady ? ' blur-sm brightness-75 pointer-events-none' : ''}`}>
         {/* Undo/Redo ボタン（左上）- 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
         {(!isReadOnly || requiresLogin) && (
           <div className="absolute top-3 left-3 z-10 flex gap-1">
@@ -283,7 +283,7 @@ export default function DiagramEditor({ diagramId, isOwner = true, initialIsPubl
       {/* 人物フッター - 編集可能時のみ（requiresLogin時はblur背景用に表示） */}
       {(!isReadOnly || requiresLogin) && (
         <footer
-          className="shrink-0 border-t overflow-hidden"
+          className={`shrink-0 border-t overflow-hidden${requiresLogin && canvasReady ? ' blur-sm brightness-75 pointer-events-none' : ''}`}
           style={{
             background: theme.panelBg,
             borderColor: theme.panelBorder,
