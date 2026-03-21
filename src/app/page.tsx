@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import TemplateCard from '@/components/top/TemplateCard'
 import DiagramCard from '@/components/profile/DiagramCard'
+import HScrollList from '@/components/ui/HScrollList'
 import type { TemplateWithCharacters, TemplateCharacter, EdgeDirection } from '@/lib/supabase/types'
 import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 
@@ -68,7 +69,7 @@ export default async function TopPage({ searchParams }: Props) {
         {user && !q && diagrams.length > 0 && (
           <div className="mb-8">
             <h2 className="text-sm font-bold text-white/50 mb-4">作成したリンク</h2>
-            <div className="flex overflow-x-auto gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <HScrollList className="gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {diagrams.map((d) => {
                 const tmpl = d.templates as { id: string; title: string; template_characters: TemplateCharacter[] } | null
                 const characters: TemplateCharacter[] = tmpl?.template_characters ?? []
@@ -97,7 +98,7 @@ export default async function TopPage({ searchParams }: Props) {
                   </div>
                 )
               })}
-            </div>
+            </HScrollList>
           </div>
         )}
 
@@ -108,13 +109,13 @@ export default async function TopPage({ searchParams }: Props) {
 
         {/* テンプレート一覧 */}
         {templates.length > 0 ? (
-          <div className="flex overflow-x-auto gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          <HScrollList className="gap-3 pb-1 sm:grid sm:overflow-visible sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {(templates as unknown as TemplateWithCharacters[]).map((t) => (
               <div key={t.id} className="shrink-0 w-44 sm:w-auto">
                 <TemplateCard template={t} isFavorited={favoriteIds.has(t.id)} userId={user?.id ?? null} />
               </div>
             ))}
-          </div>
+          </HScrollList>
         ) : (
           <div className="text-center py-20 opacity-30">
             <p className="text-4xl mb-4">🔍</p>

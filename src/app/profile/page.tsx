@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import DiagramCard from '@/components/profile/DiagramCard'
 import TemplateCard from '@/components/top/TemplateCard'
+import HScrollList from '@/components/ui/HScrollList'
 import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 import type { EdgeDirection, TemplateCharacter, TemplateWithCharacters } from '@/lib/supabase/types'
 
@@ -64,7 +65,7 @@ export default async function ProfilePage() {
             </Link>
           </div>
         ) : (
-          <div className="flex overflow-x-auto gap-3 pb-2">
+          <HScrollList className="gap-3 pb-2">
             {diagrams.map((d) => {
               const tmpl = d.templates as { id: string; title: string; template_characters: TemplateCharacter[] } | null
               const characters: TemplateCharacter[] = tmpl?.template_characters ?? []
@@ -96,7 +97,7 @@ export default async function ProfilePage() {
                 </div>
               )
             })}
-          </div>
+          </HScrollList>
         )}
 
         {/* ── 作成したテンプレート ── */}
@@ -110,13 +111,13 @@ export default async function ProfilePage() {
             </Link>
           </div>
         ) : (
-          <div className="flex overflow-x-auto gap-3 pb-2">
+          <HScrollList className="gap-3 pb-2">
             {(templates as unknown as TemplateWithCharacters[]).map((t) => (
               <div key={t.id} className="shrink-0 w-44">
                 <TemplateCard template={t} isFavorited={favoriteIds.has(t.id)} userId={user.id} />
               </div>
             ))}
-          </div>
+          </HScrollList>
         )}
 
         {/* ── お気に入りテンプレート ── */}
@@ -127,13 +128,13 @@ export default async function ProfilePage() {
             <p className="text-sm">お気に入りのテンプレートはありません</p>
           </div>
         ) : (
-          <div className="flex overflow-x-auto gap-3 pb-2">
+          <HScrollList className="gap-3 pb-2">
             {(favoritedTemplates as unknown as TemplateWithCharacters[]).map((t) => (
               <div key={t.id} className="shrink-0 w-44">
                 <TemplateCard template={t} isFavorited={true} userId={user.id} />
               </div>
             ))}
-          </div>
+          </HScrollList>
         )}
 
       </div>
