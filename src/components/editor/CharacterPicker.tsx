@@ -1,5 +1,6 @@
 'use client'
 
+import { useRef } from 'react'
 import { useDiagramStore } from '@/store/diagramStore'
 import { THEMES } from '@/lib/themes'
 import type { TemplateCharacter } from '@/lib/supabase/types'
@@ -10,6 +11,33 @@ export default function CharacterPicker() {
   const template = useDiagramStore((s) => s.template)
   const addNode = useDiagramStore((s) => s.addNode)
   const theme = THEMES[template]
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const hasDragged = useRef(false)
+  const startX = useRef(0)
+  const scrollLeftStart = useRef(0)
+
+  function handleMouseDown(e: React.MouseEvent) {
+    if (!scrollRef.current) return
+    const el = scrollRef.current
+    hasDragged.current = false
+    startX.current = e.pageX
+    scrollLeftStart.current = el.scrollLeft
+    el.style.cursor = 'grabbing'
+
+    const onMove = (ev: MouseEvent) => {
+      const dx = ev.pageX - startX.current
+      if (Math.abs(dx) > 3) hasDragged.current = true
+      el.scrollLeft = scrollLeftStart.current - dx
+    }
+    const onUp = () => {
+      el.style.cursor = 'grab'
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }
 
   const addedIds = new Set(nodes.map((n) => n.characterId))
   const sorted = [...characters].sort((a, b) => {
@@ -22,19 +50,23 @@ export default function CharacterPicker() {
   if (characters.length === 0) return null
 
   return (
-    <div className="flex items-start gap-2 overflow-x-auto px-3 py-2 h-full scrollbar-hide">
+    <div
+      ref={scrollRef}
+      className="flex items-start gap-2 overflow-x-auto px-3 py-2 h-full scrollbar-hide select-none md:cursor-grab"
+      onMouseDown={handleMouseDown}
+    >
       {sorted.map((c: TemplateCharacter) => {
         const added = addedIds.has(c.id)
         return (
           <button
             key={c.id}
-            onClick={() => !added && addNode(c)}
+            onClick={() => { if (hasDragged.current) return; if (!added) addNode(c) }}
             disabled={added}
             title={c.name}
             className={`flex flex-col items-center gap-1 shrink-0 rounded-xl px-2 py-1.5 transition-colors ${
               added
                 ? 'opacity-30 cursor-not-allowed'
-                : 'hover:bg-white/10 active:bg-white/15 cursor-pointer'
+                : 'hover:bg-white/10 active:bg-white/15 md:cursor-pointer'
             }`}
           >
             <div
