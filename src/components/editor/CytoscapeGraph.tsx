@@ -438,7 +438,7 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
           useDiagramStore.getState().updateNodePosition(n.id, x, y)
         })
         c.fit(undefined, 40)
-        onCanvasReady?.()
+        requestAnimationFrame(() => onCanvasReady?.())
       })
     }
 
@@ -451,7 +451,7 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
       requestAnimationFrame(() => {
         if (!cyRef.current || cyRef.current.destroyed()) return
         cyRef.current.fit(undefined, 40)
-        onCanvasReady?.()
+        requestAnimationFrame(() => onCanvasReady?.())
       })
     }
 
@@ -475,7 +475,7 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
           layout.one('layoutstop', () => {
             boxNodes.unlock()
             c.fit(undefined, 40)
-            onCanvasReady?.()
+            requestAnimationFrame(() => onCanvasReady?.())
             // レイアウト後の実座標を store に保存（次回保存時に正しい位置が書き込まれる）
             c.nodes('[nodeType!="box"]').forEach((n) => {
               const pos = n.position()
@@ -490,7 +490,7 @@ export default function CytoscapeGraph({ onCyReady, onCanvasReady, isReadOnly = 
             layout2.one('layoutstop', () => {
               boxNodes.unlock()
               c.fit(undefined, 40)
-              onCanvasReady?.()
+              requestAnimationFrame(() => onCanvasReady?.())
               c.nodes('[nodeType!="box"]').forEach((n) => {
                 const pos = n.position()
                 useDiagramStore.getState().updateNodePosition(n.data('storeId'), pos.x, pos.y)
