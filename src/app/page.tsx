@@ -91,7 +91,7 @@ export default async function TopPage({ searchParams }: Props) {
                     createdAt={d.created_at}
                     nodes={editorNodes}
                     edges={editorEdges}
-                    theme={(d.theme as Theme) || 'stylish'}
+                    theme={(d.theme as Theme) || 'dark'}
                     fontStyle={(d.font_style as FontStyle) || 'cool'}
                     thumbnail={d.thumbnail ?? null}
                   />

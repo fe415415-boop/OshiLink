@@ -39,9 +39,9 @@ export default function ShareSheet({ cyRef, diagramId, onClose }: Props) {
 
   function handleShareX() {
     if (!diagramId) return
-    const url = encodeURIComponent(`${window.location.origin}/diagram/${diagramId}`)
-    const text = encodeURIComponent(title || '推しリンク')
-    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank')
+    const diagramUrl = encodeURIComponent(`${window.location.origin}/diagram/${diagramId}`)
+    const text = encodeURIComponent(title || '')
+    window.open(`https://x.com/intent/tweet?text=${text}&url=${diagramUrl}`, '_blank')
   }
 
   const canShare = !!diagramId
@@ -52,42 +52,47 @@ export default function ShareSheet({ cyRef, diagramId, onClose }: Props) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="w-full max-w-xs mx-4 mb-4 sm:mb-0 rounded-2xl bg-[#1a1a2e] border border-white/10 overflow-hidden shadow-2xl p-6">
-        <div className="flex justify-around">
+        <div className="flex justify-center gap-8">
 
-          {/* 画像を保存 */}
-          <button
-            onClick={handleDownload}
-            disabled={exporting}
-            className="flex flex-col items-center gap-2 opacity-90 hover:opacity-100 disabled:opacity-40 transition-opacity"
-          >
-            <span className="text-3xl">📷</span>
-            <span className="text-xs text-white/70">{exporting ? '生成中...' : '画像を保存'}</span>
-          </button>
+          <ShareButton onClick={handleDownload} disabled={exporting} label={exporting ? '生成中...' : '画像を保存'}>
+            <span className="text-2xl leading-none">📷</span>
+          </ShareButton>
 
-          {/* リンクをコピー */}
-          <button
-            onClick={handleCopyLink}
-            disabled={!canShare}
-            title={canShare ? undefined : '先に保存してください'}
-            className="flex flex-col items-center gap-2 opacity-90 hover:opacity-100 disabled:opacity-30 transition-opacity"
-          >
-            <span className="text-3xl">🔗</span>
-            <span className="text-xs text-white/70">{copied ? 'コピーしました' : 'リンクをコピー'}</span>
-          </button>
+          <ShareButton onClick={handleCopyLink} disabled={!canShare} label={copied ? 'コピーしました' : 'リンクをコピー'}>
+            <span className="text-2xl leading-none">🔗</span>
+          </ShareButton>
 
-          {/* X でシェア */}
-          <button
-            onClick={handleShareX}
-            disabled={!canShare}
-            title={canShare ? undefined : '先に保存してください'}
-            className="flex flex-col items-center gap-2 opacity-90 hover:opacity-100 disabled:opacity-30 transition-opacity"
-          >
-            <span className="text-3xl font-bold text-white leading-none">𝕏</span>
-            <span className="text-xs text-white/70">X</span>
-          </button>
+          <ShareButton onClick={handleShareX} disabled={!canShare} label="Xでポスト">
+            <img src="/icons/x-logo.svg" alt="X" width={24} height={24} />
+          </ShareButton>
 
         </div>
       </div>
     </div>
+  )
+}
+
+function ShareButton({
+  children,
+  label,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode
+  label: string
+  onClick: () => void
+  disabled?: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex flex-col items-center gap-2 opacity-90 hover:opacity-100 disabled:opacity-30 transition-opacity"
+    >
+      <div className="h-9 w-9 flex items-center justify-center">
+        {children}
+      </div>
+      <span className="text-xs text-white/70 whitespace-nowrap">{label}</span>
+    </button>
   )
 }

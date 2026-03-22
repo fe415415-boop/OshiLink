@@ -10,7 +10,7 @@ import CharacterPicker from './CharacterPicker'
 import ThemePanel from './ThemePanel'
 import EditorIconButton from './EditorIconButton'
 import SaveDownloadModal from './SaveDownloadModal'
-import ShareSheet from './ShareSheet'
+import SharePanel from './SharePanel'
 const CytoscapeGraph = dynamic(() => import('./CytoscapeGraph'), { ssr: false })
 
 interface Props {
@@ -21,7 +21,6 @@ interface Props {
 export default function DiagramEditor({ diagramId, initialIsPublic = false }: Props) {
   const cyRef = useRef<Core | null>(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
-  const [showShareSheet, setShowShareSheet] = useState(false)
   const [isPublic, setIsPublic] = useState(initialIsPublic)
   const [togglingPublic, setTogglingPublic] = useState(false)
 
@@ -124,7 +123,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
             title="元に戻す (Ctrl+Z)"
             icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9a6 6 0 1 0 1.5-4H3M3 3v4h4"/></svg>}
             label="戻る"
-            style={{ color: theme.nodeText }}
+            style={{ color: theme.nodeText, backgroundColor: theme.inputBg, borderColor: theme.panelBorder }}
           />
           <EditorIconButton
             onClick={redo}
@@ -132,7 +131,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
             title="やり直す (Ctrl+Y)"
             icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 9a6 6 0 1 1-1.5-4H15M15 3v4h-4"/></svg>}
             label="進む"
-            style={{ color: theme.nodeText }}
+            style={{ color: theme.nodeText, backgroundColor: theme.inputBg, borderColor: theme.panelBorder }}
           />
         </div>
 
@@ -142,13 +141,8 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
         </div>
 
         {/* 共有・保存ボタン（左下） */}
-        <div className="absolute bottom-4 left-4 z-10 flex gap-1">
-          <EditorIconButton
-            onClick={() => setShowShareSheet(true)}
-            icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="14" cy="3" r="1.5"/><circle cx="14" cy="15" r="1.5"/><circle cx="4" cy="9" r="1.5"/><line x1="5.5" y1="8.1" x2="12.5" y2="4.1"/><line x1="5.5" y1="9.9" x2="12.5" y2="13.9"/></svg>}
-            label="共有"
-            style={{ color: theme.nodeText }}
-          />
+        <div className="absolute bottom-4 left-4 z-10 flex items-end gap-1">
+          <SharePanel cyRef={cyRef} diagramId={diagramId} />
           <EditorIconButton
             onClick={() => setShowSaveModal(true)}
             disabled={nodes.length === 0}
@@ -168,9 +162,9 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
               className={`w-14 py-1.5 rounded-lg font-bold transition-all border flex flex-col items-center gap-0.5 shadow-lg ${
                 isPublic
                   ? 'bg-green-600 border-green-400 text-white'
-                  : 'bg-white/5 border-white/10 opacity-60 hover:opacity-90'
+                  : 'opacity-60 hover:opacity-90'
               } disabled:opacity-30`}
-              style={{ color: isPublic ? undefined : theme.nodeText }}
+              style={isPublic ? undefined : { color: theme.nodeText, backgroundColor: theme.inputBg, borderColor: theme.panelBorder }}
             >
               <span className="h-5 flex items-center justify-center text-xs font-bold">
                 {isPublic ? '公開中' : '非公開'}
@@ -186,9 +180,9 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
             className={`w-14 py-1.5 rounded-lg font-bold transition-all border flex flex-col items-center gap-0.5 shadow-lg ${
               autoLayout
                 ? 'bg-violet-600 border-violet-400 text-white'
-                : 'bg-white/5 border-white/10 opacity-60 hover:opacity-90'
+                : 'opacity-60 hover:opacity-90'
             }`}
-            style={{ color: autoLayout ? undefined : theme.nodeText }}
+            style={autoLayout ? undefined : { color: theme.nodeText, backgroundColor: theme.inputBg, borderColor: theme.panelBorder }}
           >
             <span className="h-5 flex items-center justify-center text-xs font-bold">
               {autoLayout ? '有効' : '無効'}
@@ -216,9 +210,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
         <SaveDownloadModal onClose={() => setShowSaveModal(false)} />
       )}
 
-      {showShareSheet && (
-        <ShareSheet cyRef={cyRef} diagramId={diagramId} onClose={() => setShowShareSheet(false)} />
-      )}
+
 
     </div>
   )

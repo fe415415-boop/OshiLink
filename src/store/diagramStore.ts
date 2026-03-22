@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { TemplateCharacter, EdgeDirection } from '@/lib/supabase/types'
 
 export type { EdgeDirection }
-export type Theme = 'stylish' | 'pink' | 'simple' | 'night' | 'sunset' | 'mint'
+export type Theme = 'dark' | 'pink' | 'simple' | 'night' | 'sunset' | 'mint'
 export type FontStyle = 'cool' | 'pop' | 'emo' | 'elegant'
 
 // エディター上のノード（キャンバス内配置済み人物）
@@ -125,7 +125,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   nodes: [],
   edges: [],
   boxes: [],
-  theme: 'stylish',
+  theme: 'dark',
   fontStyle: 'cool',
 
   connectingFromId: null,
@@ -310,7 +310,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       nodes: [],
       edges: [],
       boxes: [],
-      theme: 'stylish',
+      theme: 'dark',
       fontStyle: 'cool',
       connectingFromId: null,
       autoLayout: false,

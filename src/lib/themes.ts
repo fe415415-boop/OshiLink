@@ -20,7 +20,7 @@ export interface ThemeConfig {
 }
 
 export const THEMES: Record<Theme, ThemeConfig> = {
-  stylish: {
+  dark: {
     background: '#0f0f1a',
     nodeBg: '#1a1a2e',
     nodeBorder: '#7c3aed',
@@ -151,7 +151,7 @@ export const FONT_LABELS: Record<FontStyle, string> = {
 }
 
 export const THEME_LABELS: Record<Theme, string> = {
-  stylish: 'スタイリッシュ',
+  dark: 'ダーク',
   pink: 'ピンク',
   simple: 'シンプル',
   night: 'ナイト',
