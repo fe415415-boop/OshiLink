@@ -68,7 +68,7 @@ export default function SharePanel({ cyRef, diagramId }: Props) {
             <ShareItem
               onClick={handleDownload}
               disabled={exporting}
-              label={exporting ? '生成中...' : '画像で保存'}
+              label={exporting ? '生成中...' : 'ダウンロード'}
               nodeText={theme.nodeText}
               inputBg={theme.inputBg}
               panelBorder={theme.panelBorder}
@@ -78,7 +78,7 @@ export default function SharePanel({ cyRef, diagramId }: Props) {
             <ShareItem
               onClick={handleCopyLink}
               disabled={!canShare}
-              label={copied ? 'コピー済み' : 'URLコピー'}
+              label={!canShare ? '保存後可能' : copied ? 'コピー済み' : 'URLコピー'}
               nodeText={theme.nodeText}
               inputBg={theme.inputBg}
               panelBorder={theme.panelBorder}
@@ -88,7 +88,7 @@ export default function SharePanel({ cyRef, diagramId }: Props) {
             <ShareItem
               onClick={handleShareX}
               disabled={!canShare}
-              label="Xでポスト"
+              label={!canShare ? '保存後可能' : 'Xでポスト'}
               nodeText={theme.nodeText}
               inputBg={theme.inputBg}
               panelBorder={theme.panelBorder}
