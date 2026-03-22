@@ -281,13 +281,11 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
       {showAuthModal && (
         <AuthModal
           onClose={() => setShowAuthModal(false)}
-          onSuccess={async () => {
+          onSuccess={(userId: string) => {
             setShowAuthModal(false)
             if (pendingSaveAfterAuth) {
               setPendingSaveAfterAuth(false)
-              const supabase = createClient()
-              const { data: { user: currentUser } } = await supabase.auth.getUser()
-              if (currentUser) handleSave(currentUser.id)
+              handleSave(userId)
             }
           }}
         />

@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 interface Props {
   onClose: () => void
   message?: string
-  onSuccess?: () => void
+  onSuccess?: (userId: string) => void
 }
 
 type Mode = 'login' | 'signup'
@@ -49,12 +49,12 @@ export default function AuthModal({ onClose, message, onSuccess }: Props) {
       })
       if (error) setError(error.message)
       else if (data.session) {
-        if (onSuccess) onSuccess(); else onClose()
+        if (onSuccess) onSuccess(data.session.user.id); else onClose()
       } else setDone(true)
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data: loginData, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError('メールアドレスまたはパスワードが正しくありません')
-      else { if (onSuccess) onSuccess(); else onClose() }
+      else { if (onSuccess) onSuccess(loginData.session!.user.id); else onClose() }
     }
     setLoading(false)
   }
