@@ -4,6 +4,7 @@ import Link from 'next/link'
 import DiagramCard from '@/components/profile/DiagramCard'
 import TemplateCard from '@/components/top/TemplateCard'
 import HScrollList from '@/components/ui/HScrollList'
+import Footer from '@/components/common/Footer'
 import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 import type { EdgeDirection, TemplateCharacter, TemplateWithCharacters } from '@/lib/supabase/types'
 
@@ -138,6 +139,7 @@ export default async function ProfilePage() {
         )}
 
       </div>
+      <Footer />
     </div>
   )
 }

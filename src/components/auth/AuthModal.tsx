@@ -20,6 +20,7 @@ export default function AuthModal({ onClose, message, onSuccess }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   const supabase = createClient()
 
@@ -102,24 +103,64 @@ export default function AuthModal({ onClose, message, onSuccess }: Props) {
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="メールアドレス"
-                required
-                className="w-full rounded-lg px-3 py-2.5 bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-violet-500 placeholder:text-white/25"
-              />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="パスワード"
-                required
-                minLength={8}
-                className="w-full rounded-lg px-3 py-2.5 bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-violet-500 placeholder:text-white/25"
-              />
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="メールアドレス"
+                  required
+                  className="w-full rounded-lg px-3 py-2.5 pr-8 bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-violet-500 placeholder:text-white/25"
+                />
+                {email && (
+                  <button
+                    type="button"
+                    onClick={() => setEmail('')}
+                    tabIndex={-1}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70"
+                  >×</button>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="パスワード"
+                  required
+                  minLength={8}
+                  className="w-full rounded-lg px-3 py-2.5 pr-8 bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-violet-500 placeholder:text-white/25"
+                />
+                {password && (
+                  <button
+                    type="button"
+                    onClick={() => setPassword('')}
+                    tabIndex={-1}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70"
+                  >×</button>
+                )}
+              </div>
               {error && <p className="text-red-400 text-xs">{error}</p>}
+              {mode === 'signup' && (
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
+                    className="mt-0.5 accent-violet-500 shrink-0"
+                  />
+                  <span className="text-white/60 text-xs leading-relaxed">
+                    <a
+                      href="/terms"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-violet-400 hover:text-violet-300 underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >利用規約</a>
+                    を読み、同意しました
+                  </span>
+                </label>
+              )}
               <Turnstile
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={(token) => setTurnstileToken(token)}
@@ -129,7 +170,7 @@ export default function AuthModal({ onClose, message, onSuccess }: Props) {
               />
               <button
                 type="submit"
-                disabled={loading || !turnstileToken}
+                disabled={loading || !turnstileToken || (mode === 'signup' && !agreedToTerms)}
                 className="w-full py-2.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold disabled:opacity-50 transition-colors"
               >
                 {loading ? '...' : mode === 'login' ? 'ログイン' : '登録する'}
@@ -139,13 +180,13 @@ export default function AuthModal({ onClose, message, onSuccess }: Props) {
             <p className="text-center text-white/40 text-xs mt-4">
               {mode === 'login' ? (
                 <>アカウントをお持ちでない方は{' '}
-                  <button onClick={() => { setMode('signup'); setTurnstileToken(null) }} className="text-violet-400 hover:text-violet-300">
+                  <button onClick={() => { setMode('signup'); setTurnstileToken(null); setAgreedToTerms(false) }} className="text-violet-400 hover:text-violet-300">
                     新規登録
                   </button>
                 </>
               ) : (
                 <>すでにアカウントをお持ちの方は{' '}
-                  <button onClick={() => { setMode('login'); setTurnstileToken(null) }} className="text-violet-400 hover:text-violet-300">
+                  <button onClick={() => { setMode('login'); setTurnstileToken(null); setAgreedToTerms(false) }} className="text-violet-400 hover:text-violet-300">
                     ログイン
                   </button>
                 </>

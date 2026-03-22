@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import TemplateCard from '@/components/top/TemplateCard'
 import DiagramCard from '@/components/profile/DiagramCard'
 import HScrollList from '@/components/ui/HScrollList'
+import Footer from '@/components/common/Footer'
 import type { TemplateWithCharacters, TemplateCharacter, EdgeDirection } from '@/lib/supabase/types'
 import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 
@@ -125,6 +126,7 @@ export default async function TopPage({ searchParams }: Props) {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   )
 }
