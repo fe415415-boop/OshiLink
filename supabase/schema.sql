@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS diagrams (
   title text NOT NULL DEFAULT '',
   design_template text NOT NULL DEFAULT 'stylish',
   font_style text NOT NULL DEFAULT 'cool',
+  is_public boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -55,6 +56,8 @@ CREATE TABLE IF NOT EXISTS diagram_edges (
 
 -- サムネイル列（後から追加する場合は下記を実行）
 ALTER TABLE diagrams ADD COLUMN IF NOT EXISTS thumbnail text;
+-- is_public 列（後から追加する場合は下記を実行）
+ALTER TABLE diagrams ADD COLUMN IF NOT EXISTS is_public boolean NOT NULL DEFAULT false;
 
 -- お気に入り
 CREATE TABLE IF NOT EXISTS template_favorites (
@@ -116,9 +119,9 @@ CREATE POLICY "template_chars_delete" ON template_characters FOR DELETE USING (
   )
 );
 
--- diagrams: 作者のみアクセス（保存はログイン必須）
+-- diagrams: 作者 or 公開相関図は SELECT 可 / 書き込みはログイン必須
 CREATE POLICY "diagrams_select" ON diagrams FOR SELECT
-  USING (user_id = auth.uid());
+  USING (user_id = auth.uid() OR is_public = true);
 CREATE POLICY "diagrams_insert" ON diagrams FOR INSERT
   WITH CHECK (user_id = auth.uid());
 CREATE POLICY "diagrams_update" ON diagrams FOR UPDATE
@@ -126,9 +129,9 @@ CREATE POLICY "diagrams_update" ON diagrams FOR UPDATE
 CREATE POLICY "diagrams_delete" ON diagrams FOR DELETE
   USING (user_id = auth.uid());
 
--- diagram_nodes: diagramの作者のみ
+-- diagram_nodes: diagramの作者 or 公開相関図
 CREATE POLICY "diagram_nodes_select" ON diagram_nodes FOR SELECT USING (
-  EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND user_id = auth.uid())
+  EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND (user_id = auth.uid() OR is_public = true))
 );
 CREATE POLICY "diagram_nodes_insert" ON diagram_nodes FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND user_id = auth.uid())
@@ -140,9 +143,9 @@ CREATE POLICY "diagram_nodes_delete" ON diagram_nodes FOR DELETE USING (
   EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND user_id = auth.uid())
 );
 
--- diagram_edges: diagramの作者のみ
+-- diagram_edges: diagramの作者 or 公開相関図
 CREATE POLICY "diagram_edges_select" ON diagram_edges FOR SELECT USING (
-  EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND user_id = auth.uid())
+  EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND (user_id = auth.uid() OR is_public = true))
 );
 CREATE POLICY "diagram_edges_insert" ON diagram_edges FOR INSERT WITH CHECK (
   EXISTS (SELECT 1 FROM diagrams WHERE id = diagram_id AND user_id = auth.uid())
@@ -181,3 +184,13 @@ BEGIN
   UPDATE templates SET favorites_count = GREATEST(0, favorites_count - 1) WHERE id = template_id;
 END;
 $$;
+
+-- ============================================================
+-- anon ロールへの SELECT 権限付与
+-- （RLS ポリシーでアクセス制御するが、GRANT がないと行レベルフィルタ以前にブロックされる）
+-- ============================================================
+GRANT SELECT ON templates TO anon;
+GRANT SELECT ON template_characters TO anon;
+GRANT SELECT ON diagrams TO anon;
+GRANT SELECT ON diagram_nodes TO anon;
+GRANT SELECT ON diagram_edges TO anon;

@@ -23,7 +23,7 @@ export default function EditorInitializer({ template }: Props) {
       } catch { /* fall through */ }
     }
     loadTemplate(template.id, template.title, template.template_characters)
-  }, [template, loadTemplate, loadDiagram])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return null
 }

@@ -28,9 +28,9 @@ export default async function DiagramPage({ params }: Props) {
 
   const isOwner = !!user && user.id === diagram.user_id
 
-  // 非公開かつ非所有者はメッセージページにリダイレクト
+  // 非公開かつ非所有者はカスタム404を表示
   if (!isOwner && !diagram.is_public) {
-    redirect('/not-public')
+    notFound()
   }
 
   const template = diagram.templates as { id: string; title: string; template_characters: TemplateCharacter[] }

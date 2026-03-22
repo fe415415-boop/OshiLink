@@ -269,7 +269,6 @@ export default function ConnectionModal(props: Props) {
           {/* 入力履歴 */}
           {tagHistory.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-2 items-center">
-              <span className="text-xs text-white/25">履歴</span>
               {tagHistory.map((t) => (
                 <button
                   key={t}

@@ -8,7 +8,9 @@ import { THEMES, FONT_FAMILIES } from '@/lib/themes'
 import { createClient } from '@/lib/supabase/client'
 import CharacterPicker from './CharacterPicker'
 import DesignPanel from './DesignPanel'
+import EditorIconButton from './EditorIconButton'
 import SaveDownloadModal from './SaveDownloadModal'
+import ShareSheet from './ShareSheet'
 const CytoscapeGraph = dynamic(() => import('./CytoscapeGraph'), { ssr: false })
 
 interface Props {
@@ -19,6 +21,7 @@ interface Props {
 export default function DiagramEditor({ diagramId, initialIsPublic = false }: Props) {
   const cyRef = useRef<Core | null>(null)
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [showShareSheet, setShowShareSheet] = useState(false)
   const [isPublic, setIsPublic] = useState(initialIsPublic)
   const [togglingPublic, setTogglingPublic] = useState(false)
 
@@ -115,24 +118,22 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
       <main className="flex-1 relative overflow-hidden min-h-0">
         {/* Undo/Redo ボタン（左上） */}
         <div className="absolute top-3 left-3 z-10 flex gap-1">
-          <button
+          <EditorIconButton
             onClick={undo}
             disabled={past.length === 0}
             title="元に戻す (Ctrl+Z)"
-            className="h-8 px-2.5 rounded-lg text-xs font-bold border transition-all bg-white/5 border-white/10 disabled:opacity-20 hover:opacity-90"
+            icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9a6 6 0 1 0 1.5-4H3M3 3v4h4"/></svg>}
+            label="戻る"
             style={{ color: theme.nodeText }}
-          >
-            ↩
-          </button>
-          <button
+          />
+          <EditorIconButton
             onClick={redo}
             disabled={future.length === 0}
             title="やり直す (Ctrl+Y)"
-            className="h-8 px-2.5 rounded-lg text-xs font-bold border transition-all bg-white/5 border-white/10 disabled:opacity-20 hover:opacity-90"
+            icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 9a6 6 0 1 1-1.5-4H15M15 3v4h-4"/></svg>}
+            label="進む"
             style={{ color: theme.nodeText }}
-          >
-            ↪
-          </button>
+          />
         </div>
 
         {/* デザイン切り替え（右上フローティング） */}
@@ -140,49 +141,61 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
           <DesignPanel />
         </div>
 
-        {/* 保存/ダウンロードボタン（左下） */}
-        <button
-          onClick={() => setShowSaveModal(true)}
-          disabled={nodes.length === 0}
-          className="absolute bottom-4 left-4 z-10 flex items-center gap-2 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold disabled:opacity-30 transition-colors shadow-lg"
-        >
-          <span>↓</span>
-          <span>保存 / ダウンロード</span>
-        </button>
+        {/* 共有・保存ボタン（左下） */}
+        <div className="absolute bottom-4 left-4 z-10 flex gap-1">
+          <EditorIconButton
+            onClick={() => setShowShareSheet(true)}
+            icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="14" cy="3" r="1.5"/><circle cx="14" cy="15" r="1.5"/><circle cx="4" cy="9" r="1.5"/><line x1="5.5" y1="8.1" x2="12.5" y2="4.1"/><line x1="5.5" y1="9.9" x2="12.5" y2="13.9"/></svg>}
+            label="共有"
+            style={{ color: theme.nodeText }}
+          />
+          <EditorIconButton
+            onClick={() => setShowSaveModal(true)}
+            disabled={nodes.length === 0}
+            active
+            icon={<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 14H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h8l3 3v9a1 1 0 0 1-1 1Z"/><path d="M12 14v-5H6v5M6 2v4h5"/></svg>}
+            label="保存"
+          />
+        </div>
 
-        {/* 公開/非公開トグル（右下・自動整列の左隣）- 既存相関図のみ */}
-        {diagramId && (
+        {/* 右下トグルボタン群 */}
+        <div className="absolute bottom-4 right-4 z-10 flex gap-1">
+          {/* 公開/非公開トグル - 既存相関図のみ */}
+          {diagramId && (
+            <button
+              onClick={handleTogglePublic}
+              disabled={togglingPublic}
+              className={`w-14 py-1.5 rounded-lg font-bold transition-all border flex flex-col items-center gap-0.5 shadow-lg ${
+                isPublic
+                  ? 'bg-green-600 border-green-400 text-white'
+                  : 'bg-white/5 border-white/10 opacity-60 hover:opacity-90'
+              } disabled:opacity-30`}
+              style={{ color: isPublic ? undefined : theme.nodeText }}
+            >
+              <span className="h-5 flex items-center justify-center text-xs font-bold">
+                {isPublic ? '公開中' : '非公開'}
+              </span>
+              <span className="text-[10px]">ステータス</span>
+            </button>
+          )}
+
+          {/* 自動整列トグル */}
           <button
-            onClick={handleTogglePublic}
-            disabled={togglingPublic}
-            className={`absolute bottom-4 z-10 px-3 py-2 rounded-xl text-sm font-bold border transition-colors shadow-lg ${
-              isPublic
-                ? 'bg-green-600 border-green-400 text-white'
-                : 'border-white/10 opacity-50 hover:opacity-80'
+            onClick={handleToggleAutoLayout}
+            title={autoLayout ? '自動整列 ON（クリックで OFF）' : '自動整列 OFF（クリックで ON）'}
+            className={`w-14 py-1.5 rounded-lg font-bold transition-all border flex flex-col items-center gap-0.5 shadow-lg ${
+              autoLayout
+                ? 'bg-violet-600 border-violet-400 text-white'
+                : 'bg-white/5 border-white/10 opacity-60 hover:opacity-90'
             }`}
-            style={{
-              right: 'calc(5.5rem + 1rem)',
-              background: isPublic ? undefined : theme.panelBg,
-              color: isPublic ? undefined : theme.nodeText,
-            }}
+            style={{ color: autoLayout ? undefined : theme.nodeText }}
           >
-            {isPublic ? '公開中' : '非公開'}
+            <span className="h-5 flex items-center justify-center text-xs font-bold">
+              {autoLayout ? '有効' : '無効'}
+            </span>
+            <span className="text-[10px]">自動整列</span>
           </button>
-        )}
-
-        {/* 自動整列トグル（右下） */}
-        <button
-          onClick={handleToggleAutoLayout}
-          title={autoLayout ? '自動整列 ON（クリックで OFF）' : '自動整列 OFF（クリックで ON）'}
-          className={`absolute bottom-4 right-4 z-10 px-3 py-2 rounded-xl text-sm font-bold border transition-colors shadow-lg ${
-            autoLayout
-              ? 'bg-violet-600 border-violet-400 text-white'
-              : 'border-white/10 opacity-50 hover:opacity-80'
-          }`}
-          style={{ background: autoLayout ? undefined : theme.panelBg, color: autoLayout ? undefined : theme.nodeText }}
-        >
-          自動整列
-        </button>
+        </div>
 
         <CytoscapeGraph onCyReady={handleCyReady} />
       </main>
@@ -200,7 +213,11 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
       </footer>
 
       {showSaveModal && (
-        <SaveDownloadModal cyRef={cyRef} onClose={() => setShowSaveModal(false)} />
+        <SaveDownloadModal onClose={() => setShowSaveModal(false)} />
+      )}
+
+      {showShareSheet && (
+        <ShareSheet cyRef={cyRef} diagramId={diagramId} onClose={() => setShowShareSheet(false)} />
       )}
 
     </div>
