@@ -211,7 +211,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
         <div className="absolute bottom-4 left-4 z-10 flex items-end gap-1">
           <SharePanel cyRef={cyRef} diagramId={savedDiagramId} />
           <button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             disabled={nodes.length === 0 || saving}
             className="w-14 py-1.5 rounded-lg font-bold transition-all border flex flex-col items-center gap-0.5 shadow-lg bg-violet-600 border-violet-400 text-white disabled:opacity-30"
           >
