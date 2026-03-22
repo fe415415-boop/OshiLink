@@ -28,6 +28,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [labelFading, setLabelFading] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
+  const [pendingSaveAfterAuth, setPendingSaveAfterAuth] = useState(false)
 
   const nodes = useDiagramStore((s) => s.nodes)
   const edges = useDiagramStore((s) => s.edges)
@@ -96,8 +97,9 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
     setTogglingPublic(false)
   }
 
-  async function handleSave() {
-    if (!user) { setShowAuthModal(true); return }
+  async function handleSave(userIdOverride?: string) {
+    const userId = userIdOverride ?? user?.id
+    if (!userId) { setPendingSaveAfterAuth(true); setShowAuthModal(true); return }
     if (nodes.length === 0) return
     setSaving(true)
     setSaveStatus('saving')
@@ -108,7 +110,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
         // 新規 INSERT
         const { data: diag } = await supabase
           .from('diagrams')
-          .insert({ user_id: user.id, template_id: templateId, title, theme: selectedTheme, font_style: fontStyle })
+          .insert({ user_id: userId, template_id: templateId, title, theme: selectedTheme, font_style: fontStyle })
           .select()
           .single()
         if (!diag) throw new Error('insert failed')
@@ -279,7 +281,15 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
       {showAuthModal && (
         <AuthModal
           onClose={() => setShowAuthModal(false)}
-          onSuccess={() => setShowAuthModal(false)}
+          onSuccess={async () => {
+            setShowAuthModal(false)
+            if (pendingSaveAfterAuth) {
+              setPendingSaveAfterAuth(false)
+              const supabase = createClient()
+              const { data: { user: currentUser } } = await supabase.auth.getUser()
+              if (currentUser) handleSave(currentUser.id)
+            }
+          }}
         />
       )}
     </div>

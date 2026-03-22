@@ -142,12 +142,12 @@ export default function AuthModal({ onClose, message, onSuccess }: Props) {
               </div>
               {error && <p className="text-red-400 text-xs">{error}</p>}
               {mode === 'signup' && (
-                <label className="flex items-start gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={agreedToTerms}
                     onChange={(e) => setAgreedToTerms(e.target.checked)}
-                    className="mt-0.5 accent-violet-500 shrink-0"
+                    className="accent-violet-500 shrink-0"
                   />
                   <span className="text-white/60 text-xs leading-relaxed">
                     <a
