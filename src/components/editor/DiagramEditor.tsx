@@ -7,7 +7,7 @@ import { useDiagramStore } from '@/store/diagramStore'
 import { THEMES, FONT_FAMILIES } from '@/lib/themes'
 import { createClient } from '@/lib/supabase/client'
 import CharacterPicker from './CharacterPicker'
-import DesignPanel from './DesignPanel'
+import ThemePanel from './ThemePanel'
 import EditorIconButton from './EditorIconButton'
 import SaveDownloadModal from './SaveDownloadModal'
 import ShareSheet from './ShareSheet'
@@ -26,7 +26,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
   const [togglingPublic, setTogglingPublic] = useState(false)
 
   const nodes = useDiagramStore((s) => s.nodes)
-  const template = useDiagramStore((s) => s.template)
+  const selectedTheme = useDiagramStore((s) => s.theme)
   const fontStyle = useDiagramStore((s) => s.fontStyle)
   const past = useDiagramStore((s) => s.past)
   const future = useDiagramStore((s) => s.future)
@@ -36,7 +36,7 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
   const setAutoLayout = useDiagramStore((s) => s.setAutoLayout)
   const pushHistory = useDiagramStore((s) => s.pushHistory)
 
-  const theme = THEMES[template]
+  const theme = THEMES[selectedTheme]
   const fontFamily = FONT_FAMILIES[fontStyle]
 
   const handleCyReady = useCallback((cy: Core) => { cyRef.current = cy }, [])
@@ -136,9 +136,9 @@ export default function DiagramEditor({ diagramId, initialIsPublic = false }: Pr
           />
         </div>
 
-        {/* デザイン切り替え（右上フローティング） */}
+        {/* テーマ切り替え（右上フローティング） */}
         <div className="absolute top-3 right-3 z-10">
-          <DesignPanel />
+          <ThemePanel />
         </div>
 
         {/* 共有・保存ボタン（左下） */}

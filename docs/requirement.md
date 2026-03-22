@@ -62,12 +62,12 @@
 - **非オーナー × 公開**：自動コピーリダイレクト
   - ログイン済み → サーバーサイドで DB コピー（diagrams + diagram_nodes + diagram_edges）→ `/diagram/{newId}` にリダイレクト
   - 未ログイン → `AutoCopyRedirect` コンポーネントで `sessionStorage('oshilink_copy_draft')` に保存 → `/editor/{templateId}` にリダイレクト
-- **非オーナー × 非公開**：`/not-public` にリダイレクト
+- **非オーナー × 非公開**：`notFound()` でカスタム 404 を表示（`/diagram/not-found.tsx`）
 
-### `/not-public` — 非公開相関図メッセージ
-- 「現在は非公開の相関図です。」を表示
-- `/diagram/[id]` からのリダイレクト専用ページ
-- 注: `/diagram/private` は動的ルート `/diagram/[id]` と衝突して 404 になるため、`/diagram/` 配下には置かない
+### `/diagram/not-found.tsx` — 非公開・削除済み相関図メッセージ
+- 「削除された、または現在のステータスが非公開の相関図です。作成者の方はログインすることで編集が可能です。」を表示
+- Next.js の route-scoped `not-found.tsx`（`/diagram/[id]` 配下の `notFound()` 呼び出しで表示）
+- `AuthReloader` コンポーネント内蔵：ログイン後に `authStore` の `userId` 変化を検知して `window.location.reload()` を実行 → 作成者であればエディタに遷移
 
 ### `/auth/callback` — OAuth コールバック
 - Supabase OAuth リダイレクト処理
@@ -78,11 +78,12 @@
 
 ### 3-1. レイアウト（DiagramEditor）
 - 上部：グラフキャンバス
-  - 左上：Undo / Redo ボタン
+  - 左上：**Undo（戻る）** / **Redo（進む）** ボタン（`EditorIconButton`）
   - 右上フローティング：**DesignPanel**
-  - 左下：「↓ 保存 / ダウンロード」ボタン（ノードが1件以上のとき有効）
-  - 右下：「自動整列」トグルボタン
-  - 右下（自動整列の左隣・保存済み相関図のみ）：「公開中 / 非公開」トグルボタン
+  - 左下：**共有** / **保存** ボタン（`EditorIconButton`、保存はノード1件以上のとき有効）
+  - 右下：**自動整列** トグルボタン（「有効/無効」＋「自動整列」ラベル）
+  - 右下（自動整列の左隣・保存済み相関図のみ）：**公開/非公開** トグルボタン（「公開中/非公開」＋「ステータス」ラベル）
+- 各ボタンは `EditorIconButton` コンポーネントで統一（幅 56px、アイコン＋ラベル形式）
 - 下部フッター（高さ 96px）：**CharacterPicker**（ドラッグによる慣性スクロール対応）
 - 画面離脱時に未保存ノードがあれば確認ダイアログ（`beforeunload` + `history.pushState` パッチ）
 
@@ -132,12 +133,12 @@
 | ボタン | 機能 |
 |--------|------|
 | **囲む** | ドローモード ON/OFF（ドロー中は紫ハイライト） |
-| **デザイン** | クリックでデザインテーマ選択を展開/収納 |
+| **テーマ** | クリックでテーマ選択を展開/収納 |
 | **フォント** | クリックでフォント選択を展開/収納 |
 
-- デザイン展開時：6種テーマのノード色プレビュー円を横並び表示（テーマ色背景・影付きパネル）
+- テーマ展開時：6種テーマのノード色プレビュー円を横並び表示（テーマ色背景・影付きパネル）
 - フォント展開時：4種フォントの「あ」ボタンを横並び表示（テーマ色背景・影付きパネル）
-- デザインとフォントは同時展開不可（片方を開くともう片方は閉じる）
+- テーマとフォントは同時展開不可（片方を開くともう片方は閉じる）
 - ボタン行自体はコンテナ枠線なし・背景なし（各ボタンが個別に `bg-white/5 border-white/10` を持つ）
 
 ### 3-4. CharacterPicker（フッター）
@@ -150,8 +151,11 @@
 
 ### 3-5. ConnectionModal
 - タグ：テキスト自由入力
-- タグ提案（クリックで入力）：親友 / 相棒 / ライバル / てぇてぇ / 師弟 / 尊敬 / 不仲 / 仲間 / ビジネス / ハート / 敵
+- タグ提案（クリックで入力）：親友 / 相棒 / ライバル / ビジネス / ♥
+- タグ入力履歴（最大5件）：過去に入力したカスタムタグをクリックで再入力
 - 方向選択：→ / ← / ↔ / —
+- エッジ色：8色プリセット（テーマデフォルト / 赤 / 橙 / 黄 / 緑 / 青 / 紫 / ピンク）
+- エッジ太さ：細（1px）/ 普通（2px）/ 太（4px）
 - 同一ノードペア間の同一方向エッジは追加不可（最大4本）
 
 ### 3-6. BoxModal
@@ -159,14 +163,19 @@
 - 背景色プリセット（6色 × 3系統）＋カスタムカラーピッカー
 - 「削除」「キャンセル」「適用」
 
-### 3-7. SaveDownloadModal
+### 3-7. SaveDownloadModal（保存専用）
 - タイトル入力
-- プレビュー画像（リアルタイム生成 / 手動再生成）
-- 「プロフィールに保存」（ログイン必須）
+- 「保存」ボタン（ログイン必須）
   - `diagrams` + `diagram_nodes` + `diagram_edges` を一括 INSERT
   - `increment_usage_count` RPC 呼び出し
   - サムネイル（base64）を `diagrams.thumbnail` に保存
-- 「画像をダウンロード」（PNG 形式）
+
+### 3-8. ShareSheet（共有専用）
+- 「共有」ボタンから開くボトムシート
+- **画像を保存**：Cytoscape を PNG レンダリングしてダウンロード
+- **リンクをコピー**：相関図 URL をクリップボードにコピー（コピー後「コピーしました」表示）
+- **X**：X（Twitter）共有インテントを新規タブで開く
+- 保存済み相関図（`diagramId` あり）のみリンクコピー・X 共有が有効
 
 ---
 
@@ -306,7 +315,7 @@ templates (id, title, user_id[nullable], forked_from[nullable], usage_count, fav
 template_characters (id, template_id, name, image_url[nullable], sort_order)
 
 -- 相関図
-diagrams (id, user_id, template_id, title, design_template, font_style, is_public[boolean, default false], thumbnail[base64], created_at)
+diagrams (id, user_id, template_id, title, theme, font_style, is_public[boolean, default false], thumbnail[base64], created_at)
 
 -- 相関図のノード
 diagram_nodes (id, diagram_id, character_id → ON DELETE CASCADE, pos_x, pos_y)
@@ -369,8 +378,9 @@ admins (user_id)
 3. `supabase/migrations/admin_role.sql` — 管理者ロール（`admins` テーブル・`is_admin()` 関数・RLS 更新）
 4. `supabase/migrations/safe_delete_template.sql` — テンプレート安全削除 RPC（`is_admin()` 依存）
 5. `supabase/migrations/count_character_usages.sql` — キャラクター使用カウント RPC
-6. `supabase/migrations/public_diagram_read.sql` — 公開相関図の nodes/edges を非オーナーも読み取り可能にする RLS 更新
-7. `supabase/migrations/public_diagram_select.sql` — 公開相関図の diagrams 本体を非オーナーも読み取り可能にする RLS 更新
+6. `supabase/migrations/add_updated_at_to_templates.sql` — templates に `updated_at` カラム追加＋自動更新トリガー
+7. `supabase/migrations/public_diagram_read.sql` — 公開相関図の nodes/edges を非オーナーも読み取り可能にする RLS 更新＋`GRANT SELECT TO anon`
+8. `supabase/migrations/public_diagram_select.sql` — 公開相関図の diagrams 本体を非オーナーも読み取り可能にする RLS 更新
 
 ---
 
@@ -391,8 +401,10 @@ admins (user_id)
 - 「このテンプレートで開始」「このテンプレートをコピーして編集」「このテンプレートを編集」「登場人物」「← 前の画面に戻る」
 
 ### エディタ
-- 「↓ 保存 / ダウンロード」
-- DesignPanel：「囲む」「デザイン」「フォント」
+- ボタン（左上）：「戻る」「進む」
+- ThemePanel（右上）：「囲む」「テーマ」「フォント」
+- ボタン（左下）：「共有」「保存」
+- トグル（右下）：「公開中/非公開」＋「ステータス」、「有効/無効」＋「自動整列」
 - ヒント：「下のバーからアイコンをタップして追加！」「接続先のノードをクリック（背景クリックでキャンセル）」「ドラッグで図形を作成（ESCでキャンセル）」
 - 離脱確認：「未保存の編集があります。ページを離れますか？」
 
@@ -409,9 +421,11 @@ admins (user_id)
 - 「作成したテンプレート」「作成したテンプレートはありません」
 - 「お気に入りテンプレート」「お気に入りのテンプレートはありません」「テンプレートを作成する」
 
-### SaveDownloadModal
-- 「プロフィールに保存」「画像をダウンロード」「生成中...」「保存しました」
-- 「プレビューが表示されない場合は再生成」
+### SaveDownloadModal（保存）
+- 「保存」「生成中...」「保存しました」
+
+### ShareSheet（共有）
+- 「画像を保存」「リンクをコピー」「X」「コピーしました」
 
 ---
 

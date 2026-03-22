@@ -23,7 +23,7 @@ export interface Diagram {
   user_id: string | null
   template_id: string
   title: string
-  design_template: string
+  theme: string
   font_style: string
   created_at: string
 }

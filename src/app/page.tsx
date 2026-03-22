@@ -3,7 +3,7 @@ import TemplateCard from '@/components/top/TemplateCard'
 import DiagramCard from '@/components/profile/DiagramCard'
 import HScrollList from '@/components/ui/HScrollList'
 import type { TemplateWithCharacters, TemplateCharacter, EdgeDirection } from '@/lib/supabase/types'
-import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
+import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 
 interface Props {
   searchParams: Promise<{ q?: string }>
@@ -91,7 +91,7 @@ export default async function TopPage({ searchParams }: Props) {
                     createdAt={d.created_at}
                     nodes={editorNodes}
                     edges={editorEdges}
-                    template={(d.design_template as Template) || 'stylish'}
+                    theme={(d.theme as Theme) || 'stylish'}
                     fontStyle={(d.font_style as FontStyle) || 'cool'}
                     thumbnail={d.thumbnail ?? null}
                   />

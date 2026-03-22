@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import DiagramThumbnailWrapper from './DiagramThumbnailWrapper'
-import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
+import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 
 interface Props {
   id: string
@@ -14,12 +14,12 @@ interface Props {
   createdAt: string
   nodes: EditorNode[]
   edges: EditorEdge[]
-  template: Template
+  theme: Theme
   fontStyle: FontStyle
   thumbnail: string | null
 }
 
-export default function DiagramCard({ id, title, templateTitle, createdAt, nodes, edges, template, fontStyle, thumbnail }: Props) {
+export default function DiagramCard({ id, title, templateTitle, createdAt, nodes, edges, theme, fontStyle, thumbnail }: Props) {
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -78,7 +78,7 @@ export default function DiagramCard({ id, title, templateTitle, createdAt, nodes
           <DiagramThumbnailWrapper
             nodes={nodes}
             edges={edges}
-            template={template}
+            theme={theme}
             fontStyle={fontStyle}
             thumbnail={thumbnail}
           />

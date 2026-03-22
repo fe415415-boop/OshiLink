@@ -4,7 +4,7 @@ import DiagramLoader from '@/components/editor/DiagramLoader'
 import DiagramEditor from '@/components/editor/DiagramEditor'
 import AutoCopyRedirect from '@/components/editor/AutoCopyRedirect'
 import type { TemplateCharacter, EdgeDirection } from '@/lib/supabase/types'
-import type { EditorNode, EditorEdge, Template, FontStyle } from '@/store/diagramStore'
+import type { EditorNode, EditorEdge, Theme, FontStyle } from '@/store/diagramStore'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -68,7 +68,7 @@ export default async function DiagramPage({ params }: Props) {
       templateTitle: template?.title ?? '',
       characters,
       title: diagram.title,
-      template: diagram.design_template as Template,
+      theme: diagram.theme as Theme,
       fontStyle: diagram.font_style as FontStyle,
       nodes: editorNodes,
       edges: editorEdges,
@@ -82,7 +82,7 @@ export default async function DiagramPage({ params }: Props) {
           user_id: user.id,
           template_id: template?.id ?? '',
           title: diagram.title,
-          design_template: diagram.design_template,
+          theme: diagram.theme,
           font_style: diagram.font_style,
           is_public: false,
         })
@@ -162,7 +162,7 @@ export default async function DiagramPage({ params }: Props) {
           templateTitle: template?.title ?? '',
           characters,
           title: diagram.title,
-          template: diagram.design_template,
+          theme: diagram.theme,
           fontStyle: diagram.font_style,
           nodes: editorNodes,
           edges: editorEdges,

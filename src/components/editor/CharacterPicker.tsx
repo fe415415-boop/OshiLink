@@ -8,9 +8,9 @@ import type { TemplateCharacter } from '@/lib/supabase/types'
 export default function CharacterPicker() {
   const characters = useDiagramStore((s) => s.characters)
   const nodes = useDiagramStore((s) => s.nodes)
-  const template = useDiagramStore((s) => s.template)
+  const selectedTheme = useDiagramStore((s) => s.theme)
   const addNode = useDiagramStore((s) => s.addNode)
-  const theme = THEMES[template]
+  const theme = THEMES[selectedTheme]
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const hasDragged = useRef(false)

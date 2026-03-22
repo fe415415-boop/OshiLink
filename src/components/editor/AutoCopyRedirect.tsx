@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
+import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 import type { TemplateCharacter } from '@/lib/supabase/types'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
     templateTitle: string
     characters: TemplateCharacter[]
     title: string
-    template: Template
+    theme: Theme
     fontStyle: FontStyle
     nodes: EditorNode[]
     edges: EditorEdge[]

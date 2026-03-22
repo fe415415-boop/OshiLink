@@ -3,21 +3,21 @@
 import { useEffect, useRef } from 'react'
 import cytoscape from 'cytoscape'
 import { THEMES, FONT_FAMILIES, TAG_COLORS } from '@/lib/themes'
-import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
+import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 
 interface Props {
   nodes: EditorNode[]
   edges: EditorEdge[]
-  template: Template
+  theme: Theme
   fontStyle: FontStyle
 }
 
-export default function DiagramThumbnail({ nodes, edges, template, fontStyle }: Props) {
+export default function DiagramThumbnail({ nodes, edges, theme: selectedTheme, fontStyle }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!containerRef.current || nodes.length === 0) return
-    const theme = THEMES[template]
+    const theme = THEMES[selectedTheme]
     const fontFamily = FONT_FAMILIES[fontStyle]
 
     const elements: cytoscape.ElementDefinition[] = [

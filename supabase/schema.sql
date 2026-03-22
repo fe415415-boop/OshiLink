@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS diagrams (
   user_id uuid REFERENCES auth.users ON DELETE CASCADE,
   template_id uuid NOT NULL REFERENCES templates(id) ON DELETE RESTRICT,
   title text NOT NULL DEFAULT '',
-  design_template text NOT NULL DEFAULT 'stylish',
+  theme text NOT NULL DEFAULT 'stylish',
   font_style text NOT NULL DEFAULT 'cool',
   is_public boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()

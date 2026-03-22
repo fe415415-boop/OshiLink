@@ -75,7 +75,7 @@ export default function CytoscapeGraph({ onCyReady, isReadOnly = false }: Props)
   const nodes = useDiagramStore((s) => s.nodes)
   const edges = useDiagramStore((s) => s.edges)
   const boxes = useDiagramStore((s) => s.boxes)
-  const template = useDiagramStore((s) => s.template)
+  const selectedTheme = useDiagramStore((s) => s.theme)
   const fontStyle = useDiagramStore((s) => s.fontStyle)
   const connectingFromId = useDiagramStore((s) => s.connectingFromId)
   const setConnectingFrom = useDiagramStore((s) => s.setConnectingFrom)
@@ -89,7 +89,7 @@ export default function CytoscapeGraph({ onCyReady, isReadOnly = false }: Props)
   const autoLayout = useDiagramStore((s) => s.autoLayout)
 
 
-  const theme = THEMES[template]
+  const theme = THEMES[selectedTheme]
   const fontFamily = FONT_FAMILIES[fontStyle]
 
   // drawMode 変化時に ref を同期 & Cytoscape パン制御

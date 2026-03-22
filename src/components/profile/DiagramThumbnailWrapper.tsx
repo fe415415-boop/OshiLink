@@ -1,14 +1,14 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
+import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 
 const DiagramThumbnail = dynamic(() => import('./DiagramThumbnail'), { ssr: false })
 
 interface Props {
   nodes: EditorNode[]
   edges: EditorEdge[]
-  template: Template
+  theme: Theme
   fontStyle: FontStyle
   thumbnail: string | null
 }

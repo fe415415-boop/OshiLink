@@ -1,4 +1,4 @@
-import { Template, FontStyle } from '@/store/diagramStore'
+import { Theme, FontStyle } from '@/store/diagramStore'
 
 type RelationTag = string
 type Strength = 'strong' | 'medium' | 'weak'
@@ -19,7 +19,7 @@ export interface ThemeConfig {
   boxTextColor: string
 }
 
-export const THEMES: Record<Template, ThemeConfig> = {
+export const THEMES: Record<Theme, ThemeConfig> = {
   stylish: {
     background: '#0f0f1a',
     nodeBg: '#1a1a2e',
@@ -150,7 +150,7 @@ export const FONT_LABELS: Record<FontStyle, string> = {
   elegant: '高級感',
 }
 
-export const TEMPLATE_LABELS: Record<Template, string> = {
+export const THEME_LABELS: Record<Theme, string> = {
   stylish: 'スタイリッシュ',
   pink: 'ピンク',
   simple: 'シンプル',

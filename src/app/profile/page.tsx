@@ -4,7 +4,7 @@ import Link from 'next/link'
 import DiagramCard from '@/components/profile/DiagramCard'
 import TemplateCard from '@/components/top/TemplateCard'
 import HScrollList from '@/components/ui/HScrollList'
-import type { Template, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
+import type { Theme, FontStyle, EditorNode, EditorEdge } from '@/store/diagramStore'
 import type { EdgeDirection, TemplateCharacter, TemplateWithCharacters } from '@/lib/supabase/types'
 
 export default async function ProfilePage() {
@@ -90,7 +90,7 @@ export default async function ProfilePage() {
                     createdAt={d.created_at}
                     nodes={editorNodes}
                     edges={editorEdges}
-                    template={(d.design_template as Template) || 'stylish'}
+                    theme={(d.theme as Theme) || 'stylish'}
                     fontStyle={(d.font_style as FontStyle) || 'cool'}
                     thumbnail={d.thumbnail ?? null}
                   />

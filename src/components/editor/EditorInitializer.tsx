@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useDiagramStore } from '@/store/diagramStore'
 import type { TemplateWithCharacters } from '@/lib/supabase/types'
 
@@ -11,8 +11,11 @@ interface Props {
 export default function EditorInitializer({ template }: Props) {
   const loadTemplate = useDiagramStore((s) => s.loadTemplate)
   const loadDiagram = useDiagramStore((s) => s.loadDiagram)
+  const initialized = useRef(false)
 
   useEffect(() => {
+    if (initialized.current) return
+    initialized.current = true
     const copyDraft = sessionStorage.getItem('oshilink_copy_draft')
     if (copyDraft) {
       try {

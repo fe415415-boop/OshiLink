@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { TemplateCharacter, EdgeDirection } from '@/lib/supabase/types'
 
 export type { EdgeDirection }
-export type Template = 'stylish' | 'pink' | 'simple' | 'night' | 'sunset' | 'mint'
+export type Theme = 'stylish' | 'pink' | 'simple' | 'night' | 'sunset' | 'mint'
 export type FontStyle = 'cool' | 'pop' | 'emo' | 'elegant'
 
 // エディター上のノード（キャンバス内配置済み人物）
@@ -58,7 +58,7 @@ export interface DiagramStore {
   nodes: EditorNode[]
   edges: EditorEdge[]
   boxes: EditorBox[]
-  template: Template
+  theme: Theme
   fontStyle: FontStyle
 
   // 接続操作状態
@@ -88,7 +88,7 @@ export interface DiagramStore {
     templateTitle: string
     characters: TemplateCharacter[]
     title: string
-    template: Template
+    theme: Theme
     fontStyle: FontStyle
     nodes: EditorNode[]
     edges: EditorEdge[]
@@ -109,7 +109,7 @@ export interface DiagramStore {
   updateNodeSize: (id: string, size: number) => void
   setDrawMode: (v: boolean) => void
   setAutoLayout: (v: boolean) => void
-  setTemplate: (template: Template) => void
+  setTheme: (theme: Theme) => void
   setFontStyle: (fontStyle: FontStyle) => void
   reset: () => void
   // DB保存済みのIDで上書き（保存後に呼ぶ）
@@ -125,7 +125,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   nodes: [],
   edges: [],
   boxes: [],
-  template: 'stylish',
+  theme: 'stylish',
   fontStyle: 'cool',
 
   connectingFromId: null,
@@ -197,7 +197,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       templateTitle: params.templateTitle,
       characters: params.characters,
       title: params.title,
-      template: params.template,
+      theme: params.theme,
       fontStyle: params.fontStyle,
       nodes: params.nodes,
       edges: params.edges,
@@ -301,7 +301,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
     set((state) => ({ boxes: state.boxes.filter((b) => b.id !== id) }))
   },
 
-  setTemplate: (template) => set({ template }),
+  setTheme: (theme) => set({ theme }),
   setFontStyle: (fontStyle) => set({ fontStyle }),
 
   reset: () =>
@@ -310,7 +310,7 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       nodes: [],
       edges: [],
       boxes: [],
-      template: 'stylish',
+      theme: 'stylish',
       fontStyle: 'cool',
       connectingFromId: null,
       autoLayout: false,

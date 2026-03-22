@@ -16,14 +16,14 @@ export default function ShareSheet({ cyRef, diagramId, onClose }: Props) {
   const [copied, setCopied] = useState(false)
 
   const title = useDiagramStore((s) => s.title)
-  const template = useDiagramStore((s) => s.template)
+  const theme = useDiagramStore((s) => s.theme)
   const fontStyle = useDiagramStore((s) => s.fontStyle)
 
   async function handleDownload() {
     if (!cyRef.current) return
     setExporting(true)
     try {
-      await exportToPng({ cy: cyRef.current, title, template, fontStyle })
+      await exportToPng({ cy: cyRef.current, title, theme, fontStyle })
     } finally {
       setExporting(false)
     }

@@ -22,7 +22,7 @@ export default function SaveDownloadModal({ onClose }: Props) {
   const templateId = useDiagramStore((s) => s.templateId)
   const nodes = useDiagramStore((s) => s.nodes)
   const edges = useDiagramStore((s) => s.edges)
-  const template = useDiagramStore((s) => s.template)
+  const theme = useDiagramStore((s) => s.theme)
   const fontStyle = useDiagramStore((s) => s.fontStyle)
   const user = useAuthStore((s) => s.user)
 
@@ -36,7 +36,7 @@ export default function SaveDownloadModal({ onClose }: Props) {
 
     const { data: diag, error: diagErr } = await supabase
       .from('diagrams')
-      .insert({ user_id: user.id, template_id: templateId, title, design_template: template, font_style: fontStyle })
+      .insert({ user_id: user.id, template_id: templateId, title, theme, font_style: fontStyle })
       .select()
       .single()
 

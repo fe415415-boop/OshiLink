@@ -1,18 +1,18 @@
 import { Core } from 'cytoscape'
 import { THEMES, FONT_FAMILIES } from './themes'
-import { Template, FontStyle } from '@/store/diagramStore'
+import { Theme, FontStyle } from '@/store/diagramStore'
 
 export interface ExportOptions {
   cy: Core
   title: string
-  template: Template
+  theme: Theme
   fontStyle: FontStyle
 }
 
 /** グラフ + 右上ブランディングを合成した OffscreenCanvas を返す */
 async function buildCompositeCanvas(options: ExportOptions, scale: number): Promise<OffscreenCanvas> {
-  const { cy, title, template, fontStyle } = options
-  const theme = THEMES[template]
+  const { cy, title, theme: selectedTheme, fontStyle } = options
+  const theme = THEMES[selectedTheme]
   const fontFamily = FONT_FAMILIES[fontStyle]
 
   try { await document.fonts.load(`bold 14px ${fontFamily}`) } catch { /* ignore */ }

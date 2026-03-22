@@ -1,23 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { useDiagramStore, Template, FontStyle } from '@/store/diagramStore'
-import { TEMPLATE_LABELS, FONT_LABELS, FONT_FAMILIES, THEMES } from '@/lib/themes'
+import { useDiagramStore, Theme, FontStyle } from '@/store/diagramStore'
+import { THEME_LABELS, FONT_LABELS, FONT_FAMILIES, THEMES } from '@/lib/themes'
 import EditorIconButton from './EditorIconButton'
 
-const TEMPLATES: Template[] = ['stylish', 'pink', 'simple', 'night', 'sunset', 'mint']
+const THEME_KEYS: Theme[] = ['stylish', 'pink', 'simple', 'night', 'sunset', 'mint']
 const FONTS: FontStyle[] = ['cool', 'pop', 'emo', 'elegant']
 
-export default function DesignPanel() {
-  const template = useDiagramStore((s) => s.template)
+export default function ThemePanel() {
+  const selectedTheme = useDiagramStore((s) => s.theme)
   const fontStyle = useDiagramStore((s) => s.fontStyle)
   const drawMode = useDiagramStore((s) => s.drawMode)
-  const setTemplate = useDiagramStore((s) => s.setTemplate)
+  const setTheme = useDiagramStore((s) => s.setTheme)
   const setFontStyle = useDiagramStore((s) => s.setFontStyle)
   const setDrawMode = useDiagramStore((s) => s.setDrawMode)
-  const theme = THEMES[template]
+  const theme = THEMES[selectedTheme]
 
-  const [designOpen, setDesignOpen] = useState(false)
+  const [themeOpen, setThemeOpen] = useState(false)
   const [fontOpen, setFontOpen] = useState(false)
 
   return (
@@ -26,7 +26,7 @@ export default function DesignPanel() {
       <div className="flex gap-1">
         {/* 囲む */}
         <EditorIconButton
-          onClick={() => { setDrawMode(!drawMode); setDesignOpen(false); setFontOpen(false) }}
+          onClick={() => { setDrawMode(!drawMode); setThemeOpen(false); setFontOpen(false) }}
           title={drawMode ? '図形描画中（ESCでキャンセル）' : '図形を追加'}
           active={drawMode}
           icon={<svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="1" width="16" height="12" rx="2" /></svg>}
@@ -34,18 +34,18 @@ export default function DesignPanel() {
           style={{ color: drawMode ? undefined : theme.nodeText }}
         />
 
-        {/* デザイン */}
+        {/* テーマ */}
         <EditorIconButton
-          onClick={() => { setDesignOpen((v) => !v); setFontOpen(false) }}
-          open={designOpen}
+          onClick={() => { setThemeOpen((v) => !v); setFontOpen(false) }}
+          open={themeOpen}
           icon={<span className="w-5 h-5 rounded-full block" style={{ background: theme.nodeBg, border: `2.5px solid ${theme.nodeBorder}` }} />}
-          label="デザイン"
+          label="テーマ"
           style={{ color: theme.nodeText }}
         />
 
         {/* フォント */}
         <EditorIconButton
-          onClick={() => { setFontOpen((v) => !v); setDesignOpen(false) }}
+          onClick={() => { setFontOpen((v) => !v); setThemeOpen(false) }}
           open={fontOpen}
           icon={<span className="text-base leading-none" style={{ fontFamily: FONT_FAMILIES[fontStyle] }}>あ</span>}
           label="フォント"
@@ -53,17 +53,17 @@ export default function DesignPanel() {
         />
       </div>
 
-      {/* デザイン展開 */}
-      {designOpen && (
+      {/* テーマ展開 */}
+      {themeOpen && (
         <div className="flex gap-1 flex-wrap rounded-xl p-1.5 backdrop-blur-sm shadow-xl" style={{ background: `${theme.panelBg}dd` }}>
-          {TEMPLATES.map((t) => {
+          {THEME_KEYS.map((t) => {
             const th = THEMES[t]
-            const isActive = template === t
+            const isActive = selectedTheme === t
             return (
               <button
                 key={t}
-                onClick={() => setTemplate(t)}
-                title={TEMPLATE_LABELS[t]}
+                onClick={() => setTheme(t)}
+                title={THEME_LABELS[t]}
                 className={`w-9 h-8 rounded-lg flex items-center justify-center transition-all border ${
                   isActive ? 'border-violet-400 ring-2 ring-violet-500/50' : 'border-white/10 opacity-60 hover:opacity-90'
                 }`}
